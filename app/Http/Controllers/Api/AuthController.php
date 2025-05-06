@@ -30,7 +30,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role_id' => 3, // default mahasiswa
+            'role' => 'mahasiswa', // default role using enum
             'nim' => $request->nim,
             'full_name' => $request->full_name,
             'date_of_birth' => $request->date_of_birth,
@@ -45,10 +45,9 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-            'redirect_to' => '/login'
+            'redirect_to' => 'mahasiswa'
         ], 201);
     }
-
 
     /**
      * Login API - Menghasilkan Token dan Redirect Role
@@ -70,22 +69,22 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        $role_id = $user->role_id;
+        $role = $user->role;
         $role_message = '';
         $redirect_to = '';
 
-        switch ($role_id) {
-            case 1:
+        switch ($role) {
+            case 'admin':
                 $role_message = 'Selamat datang Admin!';
-                $redirect_to = 'adminHome';
+                $redirect_to = 'admin';
                 break;
-            case 2:
+            case 'petugas':
                 $role_message = 'Halo Petugas, selamat bertugas!';
-                $redirect_to = 'petugasHome';
+                $redirect_to = 'petugas';
                 break;
-            case 3:
+            case 'mahasiswa':
                 $role_message = 'Halo Mahasiswa, selamat datang!';
-                $redirect_to = 'mahasiswaHome';
+                $redirect_to = 'mahasiswa';
                 break;
             default:
                 $role_message = 'Selamat datang!';
@@ -130,61 +129,46 @@ class AuthController extends Controller
      * Update Profile API - Update data umum user
      */
     public function updateProfile(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    $request->validate([
-        'name' => 'sometimes|string|max:100',
-        'nim' => 'sometimes|string|unique:users,nim,' . $user->id,
-        'full_name' => 'sometimes|string|max:255',
-        'email' => 'sometimes|email|unique:users,email,' . $user->id,
-        'phone_number' => 'sometimes|string|max:20',
-        'address' => 'sometimes|string|max:255',
-        'date_of_birth' => 'sometimes|date',
-        'image' => 'sometimes|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+        $request->validate([
+            'name' => 'sometimes|string|max:100',
+            'nim' => 'sometimes|string|unique:users,nim,' . $user->id,
+            'full_name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'phone_number' => 'sometimes|string|max:20',
+            'address' => 'sometimes|string|max:255',
+            'date_of_birth' => 'sometimes|date',
+            'image' => 'sometimes|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-    if ($request->has('name')) {
-        $user->name = $request->name;
-    }
-    if ($request->has('email')) {
-        $user->email = $request->email;
-    }
-    if ($request->has('phone_number')) {
-        $user->phone_number = $request->phone_number;
-    }
-    if ($request->has('address')) {
-        $user->address = $request->address;
-    }
-    if ($request->has('nim')) {
-        $user->nim = $request->nim;
-    }
-    if ($request->has('full_name')) {
-        $user->full_name = $request->full_name;
-    }
-    if ($request->has('date_of_birth')) {
-        $user->date_of_birth = $request->date_of_birth;
-    }
+        if ($request->has('name')) $user->name = $request->name;
+        if ($request->has('email')) $user->email = $request->email;
+        if ($request->has('phone_number')) $user->phone_number = $request->phone_number;
+        if ($request->has('address')) $user->address = $request->address;
+        if ($request->has('nim')) $user->nim = $request->nim;
+        if ($request->has('full_name')) $user->full_name = $request->full_name;
+        if ($request->has('date_of_birth')) $user->date_of_birth = $request->date_of_birth;
 
-    if ($request->hasFile('image')) {
-        if ($user->image && Storage::disk('public')->exists(str_replace('storage/', '', $user->image))) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $user->image));
+        if ($request->hasFile('image')) {
+            if ($user->image && Storage::disk('public')->exists(str_replace('storage/', '', $user->image))) {
+                Storage::disk('public')->delete(str_replace('storage/', '', $user->image));
+            }
+
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/users', $filename, 'public');
+            $user->image = 'storage/' . $path;
         }
 
-        $file = $request->file('image');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('uploads/users', $filename, 'public');
-        $user->image = 'storage/' . $path;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui!',
+            'user' => $user
+        ]);
     }
-
-    $user->save();
-
-    return response()->json([
-        'message' => 'Profil berhasil diperbarui!',
-        'user' => $user
-    ]);
-}
-
 
     /**
      * Upload Profile Image Saja - Jika mau upload gambar doang

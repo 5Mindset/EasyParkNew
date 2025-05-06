@@ -30,11 +30,12 @@ class OtpController extends Controller
             'expired_at' => $expiredAt,
         ]);
 
-        // Kirim email
-        Mail::raw("Kode OTP kamu adalah: $otp", function ($message) use ($request) {
+        // Kirim email dengan view Blade
+        Mail::send('emails.otp', ['otp' => $otp], function ($message) use ($request) {
             $message->to($request->email)
-                    ->subject('Kode OTP Reset Password');
+                ->subject('Kode OTP Reset Password');
         });
+
 
         return response()->json(['message' => 'OTP terkirim ke email']);
     }
