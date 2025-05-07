@@ -3,7 +3,7 @@
     <ul class="sidebar-nav" id="sidebar-nav">
 
         <li class="nav-item">
-            <a class="nav-link " href="index.html">
+            <a class="nav-link " href="dashboard">
                 <i class="bi bi-grid"></i>
                 <span>Dashboard</span>
             </a>
@@ -33,29 +33,29 @@
             <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-journal-text"></i><span>Kendaraan</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+            <ul id="forms-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="forms-elements.html">
+                    <a href="{{ route('vehicle-types.index') }}">
                         <i class="bi bi-circle"></i><span>Tipe Kendaraan</span>
                     </a>
                 </li>
                 <li>
-                    <a href="forms-layouts.html">
+                    <a href="{{ route('vehicle-brands.index') }}">
                         <i class="bi bi-circle"></i><span>Merek Kendaraan</span>
                     </a>
                 </li>
                 <li>
-                    <a href="forms-editors.html">
+                    <a href="{{ route('vehicle-models.index') }}">
                         <i class="bi bi-circle"></i><span>Model Kendaraan</span>
                     </a>
                 </li>
                 <li>
-                    <a href="forms-validation.html">
+                    <a href="{{ route('vehicles.index') }}">
                         <i class="bi bi-circle"></i><span>Kendaraan</span>
                     </a>
                 </li>
             </ul>
-        </li><!-- End Forms Nav -->
+        </li><!-- End Forms Nav -->        
 
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">

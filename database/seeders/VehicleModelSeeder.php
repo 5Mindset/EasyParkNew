@@ -19,10 +19,27 @@ class VehicleModelSeeder extends Seeder
 
         // Contoh data manual
         $models = [
-            ['name' => 'Vario 150', 'brand' => 'Honda', 'type' => 'Motor'],
-            ['name' => 'Beat Street', 'brand' => 'Honda', 'type' => 'Motor'],
-            ['name' => 'Fortuner', 'brand' => 'Toyota', 'type' => 'Mobil'],
-            ['name' => 'Xenia', 'brand' => 'Daihatsu', 'type' => 'Mobil'],
+            ['name' => 'Honda Vario 125', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Scoopy', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Beat', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda PCX160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Beat Street', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda CRF150L', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Stylo 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Vario 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda ADV 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Supra GTR 150', 'brand' => 'Honda', 'type' => 'Motor'],
+
+            ['name' => 'Honda Vario 125', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Scoopy', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Beat', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda PCX160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Beat Street', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda CRF150L', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Stylo 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Vario 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda ADV 160', 'brand' => 'Honda', 'type' => 'Motor'],
+            ['name' => 'Honda Supra GTR 150', 'brand' => 'Honda', 'type' => 'Motor'],
         ];
 
         foreach ($models as $model) {

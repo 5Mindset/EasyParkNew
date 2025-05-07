@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\VehicleModelController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\GuestVehicleController;
 use App\Http\Controllers\Api\ParkingRecordController;
+use App\Http\Controllers\Api\VehicleStudentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OtpController;
 
@@ -41,4 +42,9 @@ Route::middleware(['auth:sanctum', 'roleApi:admin'])->group(function () {
             'user' => $request->user()
         ]);
     });
+});
+
+// Routes for Mahasiswa only
+Route::middleware(['auth:sanctum', 'roleApi:mahasiswa'])->group(function () {
+    Route::apiResource('my-vehicles', VehicleStudentController::class);
 });
