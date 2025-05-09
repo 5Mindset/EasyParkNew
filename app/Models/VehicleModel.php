@@ -13,13 +13,19 @@ class VehicleModel extends Model
         return $this->hasMany(Vehicle::class);
     }
 
-    public function vehicleBrand()
+    /**
+     * Get the brand that this model belongs to.
+     */
+    public function vehicle_brand()
     {
-        return $this->belongsTo(VehicleBrand::class);
+        return $this->belongsTo(VehicleBrand::class, 'vehicle_brand_id');
     }
-    
-    public function vehicleType()
+
+    /**
+     * Get the type that this model belongs to.
+     */
+    public function vehicle_type()
     {
-        return $this->belongsTo(VehicleType::class);
+        return $this->belongsTo(VehicleType::class, 'vehicle_type_id');
     }
 }

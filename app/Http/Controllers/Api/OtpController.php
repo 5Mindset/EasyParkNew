@@ -37,7 +37,11 @@ class OtpController extends Controller
         });
 
 
-        return response()->json(['message' => 'OTP terkirim ke email']);
+        return response()->json([
+            'message' => 'OTP terkirim ke email',
+            'expires_at' => $expiredAt->toDateTimeString(),
+            'seconds_remaining' => $expiredAt->diffInSeconds(now()),
+        ]);
     }
 
     // 2. Verifikasi OTP
@@ -64,12 +68,11 @@ class OtpController extends Controller
         return response()->json(['message' => 'OTP berhasil diverifikasi']);
     }
 
-    // 3. Ganti password setelah OTP valid
     public function resetPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|min:6|confirmed', // pakai password_confirmation
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $otp = OtpCode::where('email', $request->email)
@@ -83,9 +86,16 @@ class OtpController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
+
+        // 🔒 Cek apakah password baru sama dengan password lama
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Password baru tidak boleh sama dengan password lama'], 422);
+        }
+
+        // Update password
         $user->update(['password' => Hash::make($request->password)]);
 
-        // Hapus semua OTP untuk email ini
+        // Hapus semua OTP
         OtpCode::where('email', $request->email)->delete();
 
         return response()->json(['message' => 'Password berhasil direset']);

@@ -4,13 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleBrand;
+use App\Models\VehicleModel;
 use Illuminate\Http\Request;
 
 class VehicleBrandController extends Controller
 {
     public function index()
     {
-        return VehicleBrand::all();
+        try {
+            $brands = VehicleBrand::all();
+            return response()->json($brands);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vehicle brands',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
@@ -47,5 +57,31 @@ class VehicleBrandController extends Controller
         $vehicleBrand->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function getByType($typeId)
+    {
+        try {
+            // Find distinct brands that have models with the given vehicle_type_id
+            $brands = VehicleBrand::whereHas('models', function ($query) use ($typeId) {
+                $query->where('vehicle_type_id', $typeId);
+            })->get();
+
+            if ($brands->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'message' => 'No brands found for this vehicle type'
+                ]);
+            }
+
+            return response()->json($brands);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message'=> 'Failed to fetch brands for vehicle type',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

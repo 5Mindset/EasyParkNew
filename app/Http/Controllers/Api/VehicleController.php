@@ -14,6 +14,14 @@ class VehicleController extends Controller
         return Vehicle::with(['model', 'user'])->get();
     }
 
+    public function indexUser(Request $request)
+    {
+        $user = $request->user();
+        return Vehicle::where('user_id', $user->id)
+                      ->with(['model.vehicle_brand', 'model.vehicle_type'])
+                      ->get();
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -40,6 +48,15 @@ class VehicleController extends Controller
         return response()->json($vehicle);
     }
 
+    public function showUser(Request $request, $id)
+    {
+        $user = $request->user();
+        $vehicle = Vehicle::where('user_id', $user->id)
+                          ->with(['model.vehicle_brand', 'model.vehicle_type'])
+                          ->findOrFail($id);
+        return response()->json($vehicle);
+    }
+
     public function update(Request $request, $id)
     {
         $vehicle = Vehicle::findOrFail($id);
@@ -55,7 +72,6 @@ class VehicleController extends Controller
         $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id', 'qr_code']);
 
         if ($request->hasFile('stnk_image')) {
-            // Hapus gambar lama jika ada
             if ($vehicle->stnk_image) {
                 Storage::disk('public')->delete($vehicle->stnk_image);
             }

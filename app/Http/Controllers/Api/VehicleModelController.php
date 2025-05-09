@@ -53,4 +53,26 @@ class VehicleModelController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function getByBrand($brandId)
+    {
+        try {
+            $models = VehicleModel::where('vehicle_brand_id', $brandId)
+                ->with(['vehicle_brand', 'vehicle_type'])
+                ->get();
+
+            return response()->json($models, 200);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching vehicle models by brand', [
+                'brand_id' => $brandId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vehicle models by brand',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
