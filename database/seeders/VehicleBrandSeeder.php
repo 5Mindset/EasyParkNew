@@ -10,7 +10,8 @@ class VehicleBrandSeeder extends Seeder
     public function run(): void
     {
         $brands = [
-            'Honda'
+            'Honda', 'Yamaha', 'Kawasaki', 'Suzuki', 'Benelli', 'KTM', 'TVS', 'BMW',
+            'Viar', 'Vespa', 'Royal Enfield'
         ];
 
         foreach ($brands as $brand) {

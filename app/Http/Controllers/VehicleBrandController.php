@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\VehicleBrand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class VehicleBrandController extends Controller
 {

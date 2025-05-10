@@ -9,6 +9,9 @@
 <link href="{{ asset('assets/img/logo.png') }}" rel="icon">
 <link href="{{ asset('assets/img/logo.png') }}" rel="apple-touch-icon">
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Google Fonts -->
 <link href="https://fonts.gstatic.com" rel="preconnect">
 <link

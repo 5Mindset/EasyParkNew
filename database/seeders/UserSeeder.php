@@ -4,50 +4,79 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Admin
         User::firstOrCreate([
-            'email' => 'admin@example.com',
+            'email' => 'admin@polije.ac.id',
         ], [
             'name' => 'admin',
-            'full_name' => 'Admin User',
-            'nim' => 'E20250001',
-            'password' => bcrypt('admin123'),
-            'phone_number' => '081234567890',
-            'address' => 'Jember',
-            'date_of_birth' => '2000-01-01',
-            'image' => 'uploads/users/admin.png',
+            'nim' => '12345',
+            'password' => Hash::make('admin123'),
             'role' => 'admin',
         ]);
 
+        // Petugas
         User::firstOrCreate([
-            'email' => 'petugas@example.com',
+            'email' => 'petugas.parkir@polije.ac.id',
         ], [
             'name' => 'petugas',
-            'full_name' => 'Petugas Parkir',
-            'nim' => 'E20250002',
-            'password' => bcrypt('petugas123'),
-            'phone_number' => '081234567891',
-            'address' => 'Kampus Polije',
-            'date_of_birth' => '1998-05-12',
-            'image' => 'uploads/users/petugas.png',
+            'nim' => '54321',
+            'password' => Hash::make('petugas123'),
             'role' => 'petugas',
         ]);
 
+        // Mahasiswa 1
         User::firstOrCreate([
-            'email' => 'mahasiswa@example.com',
+            'email' => 'e41230869@student.polije.ac.id',
         ], [
-            'name' => 'mahasiswa',
-            'full_name' => 'Mahasiswa Polije',
-            'nim' => 'E20250003',
-            'password' => bcrypt('mahasiswa123'),
-            'phone_number' => '081234567892',
-            'address' => 'Asrama Polije',
-            'date_of_birth' => '2003-08-21',
-            'image' => 'uploads/users/mahasiswa.png',
+            'name' => 'Alief',
+            'nim' => 'E41230869',
+            'password' => Hash::make('mahasiswa123'),
+            'role' => 'mahasiswa',
+        ]);
+
+        // Mahasiswa 2
+        User::firstOrCreate([
+            'email' => '(e41232386@student.polije.ac.id',
+        ], [
+            'name' => 'Alfino',
+            'nim' => 'E41232386',
+            'password' => Hash::make('mahasiswa123'),
+            'role' => 'mahasiswa',
+        ]);
+
+        // Mahasiswa 3
+        User::firstOrCreate([
+            'email' => '(e41231765@student.polije.ac.id',
+        ], [
+            'name' => 'Raffi',
+            'nim' => 'E41231765',
+            'password' => Hash::make('mahasiswa123'),
+            'role' => 'mahasiswa',
+        ]);
+
+        // Mahasiswa 4
+        User::firstOrCreate([
+            'email' => 'e41231774@student.polije.ac.id',
+        ], [
+            'name' => 'Raihan',
+            'nim' => 'E41231774',
+            'password' => Hash::make('mahasiswa123'),
+            'role' => 'mahasiswa',
+        ]);
+
+        // Mahasiswa 5
+        User::firstOrCreate([
+            'email' => 'e41232280@student.polije.ac.id',
+        ], [
+            'name' => 'Arifin',
+            'nim' => 'E41232280',
+            'password' => Hash::make('mahasiswa123'),
             'role' => 'mahasiswa',
         ]);
     }

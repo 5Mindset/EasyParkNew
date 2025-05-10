@@ -16,7 +16,7 @@ class VehicleModelController extends Controller
         $vehicleModels = VehicleModel::when($search, function ($query, $search) {
             return $query->where('name', 'like', '%' . $search . '%');
         })->orderBy('created_at', 'desc')
-          ->paginate(10); // paginate, bukan all()
+            ->paginate(10); // paginate, bukan all()
 
         return view('admin.models.index', compact('vehicleModels'));
     }
@@ -25,7 +25,7 @@ class VehicleModelController extends Controller
     {
         $vehicleBrands = VehicleBrand::all();
         $vehicleTypes = VehicleType::all();
-        
+
         return view('admin.models.create', compact('vehicleBrands', 'vehicleTypes'));
     }
 
