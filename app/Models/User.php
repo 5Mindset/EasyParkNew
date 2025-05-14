@@ -54,10 +54,26 @@ class User extends Authenticatable
             'role' => 'string', // Tambahkan ini
         ];
     }
-    
+
+    public function getNipAttribute()
+    {
+        return $this->role === 'petugas' ? $this->nim : null;
+    }
+
+    public function setNipAttribute($value)
+    {
+        if ($this->role === 'petugas') {
+            $this->attributes['nim'] = $value;
+        }
+    }
 
     public function vehicles()
     {
         return $this->hasMany(Vehicle::class);
+    }
+
+    public function getNameAttribute()
+    {
+        return explode(' ', $this->full_name)[0]; 
     }
 }

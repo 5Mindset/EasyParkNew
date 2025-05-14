@@ -17,4 +17,9 @@ class VehicleBrand extends Model
     {
         return $this->hasMany(VehicleModel::class);
     }
+
+    public function models()
+    {
+        return $this->hasMany(VehicleModel::class);
+    }
 }

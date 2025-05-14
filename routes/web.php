@@ -6,6 +6,9 @@ use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OfficerController;
+use App\Http\Controllers\StudentController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,6 +26,9 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     Route::resource('vehicle-brands', VehicleBrandController::class);
     Route::resource('vehicle-models', VehicleModelController::class);
     Route::resource('vehicles', VehicleController::class);
+    Route::resource('officers', OfficerController::class);
+    Route::resource('students', StudentController::class);
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
