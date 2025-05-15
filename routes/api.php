@@ -53,4 +53,6 @@ Route::middleware(['auth:sanctum', 'roleApi:mahasiswa'])->group(function () {
     Route::get('/vehicle-models', [VehicleModelController::class, 'index']);
     Route::get('/vehicle-brands/by-type/{typeId}', [VehicleBrandController::class, 'getByType']);
     Route::get('/vehicle-models/by-brand/{brandId}', [VehicleModelController::class, 'getByBrand']);
+    Route::post('/vehicle-models', [VehicleModelController::class, 'store']);
+    Route::post('/my-vehicles/{id}', [VehicleStudentController::class, 'update']); // Tambahkan ini
 });
