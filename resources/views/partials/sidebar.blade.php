@@ -64,12 +64,12 @@
             </a>
             <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general.html">
-                        <i class="bi bi-circle"></i><span>Parkir</span>
+                    <a href="{{ route('parking-records.index') }}">
+                        <i class="bi bi-circle"></i><span>Mahasiswa Parkir</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data.html">
+                    <a href="{{ route('guest-vehicles.index') }}">
                         <i class="bi bi-circle"></i><span>Tamu Parkir</span>
                     </a>
                 </li>

@@ -26,4 +26,14 @@ class Vehicle extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function brand()
+    {
+        return $this->model?->vehicleBrand; // akses langsung via model
+    }
+
+    public function vehicleType()
+    {
+        return $this->model?->vehicleType;
+    }
 }

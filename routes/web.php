@@ -4,10 +4,12 @@ use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\VehicleBrandController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileController1;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\GuestVehicleController;
+use App\Http\Controllers\ParkingRecordController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +18,9 @@ Route::get('/', function () {
 });
 
 // Dashboard untuk Admin (hanya bisa diakses oleh user yang sudah login dan verified)
-Route::get('/dashboard', function () {
-    return view('admin/dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 // Menambahkan middleware untuk role admin pada route resource
 Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
@@ -28,15 +30,18 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     Route::resource('vehicles', VehicleController::class);
     Route::resource('officers', OfficerController::class);
     Route::resource('students', StudentController::class);
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('guest-vehicles', GuestVehicleController::class);
+    Route::resource('parking-records', ParkingRecordController::class);
 });
 
-// Route untuk halaman profil pengguna (biasa)
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController1::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController1::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController1::class, 'update'])->name('profile.update');
+
+    // 👇 Tambahkan ini untuk edit dan update password
+    Route::get('/profile/password', [ProfileController1::class, 'editPassword'])->name('profile.password.edit');
+    Route::put('/profile/password', [ProfileController1::class, 'updatePassword'])->name('profile.updatePassword');
 });
 
 require __DIR__ . '/auth.php';

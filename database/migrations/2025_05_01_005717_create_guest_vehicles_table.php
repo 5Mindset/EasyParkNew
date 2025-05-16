@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('plate_number')->unique(); 
             $table->string('owner_name'); 
-            $table->foreignId('vehicle_model_id')->constrained()->onDelete('cascade'); 
+            $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade'); // relasi ke vehicle_types
             $table->timestamp('entry_time'); 
             $table->timestamp('exit_time')->nullable(); 
             $table->enum('status', ['parked', 'exited'])->default('parked'); 

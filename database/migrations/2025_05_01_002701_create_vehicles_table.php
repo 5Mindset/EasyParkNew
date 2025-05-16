@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vehicle_types', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique(); 
+            $table->unsignedInteger('max_parking')->default(0);
             $table->timestamps();
         });
 

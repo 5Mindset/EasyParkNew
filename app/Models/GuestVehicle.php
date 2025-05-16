@@ -13,15 +13,15 @@ class GuestVehicle extends Model
     protected $fillable = [
         'plate_number',
         'owner_name',
-        'vehicle_model_id',
+        'vehicle_type_id', // ganti dari vehicle_model_id
         'entry_time',
         'exit_time',
         'status',
     ];
 
-    // Relasi dengan model VehicleModel
-    public function vehicleModel()
+    // Relasi dengan model VehicleType
+    public function vehicleType()
     {
-        return $this->belongsTo(VehicleModel::class);
+        return $this->belongsTo(VehicleType::class);
     }
 }
