@@ -6,15 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class VehicleType extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'max_parking'];
 
-    public function vehicles()
+    public function brands()
     {
-        return $this->hasMany(Vehicle::class);
-    }
-
-    public function models()
-    {
-        return $this->hasMany(VehicleModel::class, 'vehicle_type_id');
+        return $this->hasMany(VehicleBrand::class, 'vehicle_type_id');
     }
 }

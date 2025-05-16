@@ -30,11 +30,11 @@
                         {{-- Info Kendaraan --}}
                         <div class="row mb-4">
                             @foreach ([
-            'Model' => $vehicle->model->name,
-            'Merek' => $vehicle->model->vehicleBrand->name ?? '-',
-            'Jenis' => $vehicle->model->vehicleType->name ?? '-',
-            'Pemilik' => $vehicle->user->name ?? '-',
-        ] as $label => $value)
+                                'Model' => $vehicle->model->name ?? '-',
+                                'Merek' => $vehicle->model->vehicleBrand->name ?? '-',
+                                'Jenis' => optional(optional($vehicle->model->vehicleBrand)->vehicleType)->name ?? '-',
+                                'Pemilik' => $vehicle->user->name ?? '-',
+                            ] as $label => $value)
                                 <div class="col-md-6 mb-3">
                                     <div class="p-3 bg-light rounded">
                                         <h6 class="text-muted mb-2">{{ $label }}</h6>
@@ -74,4 +74,6 @@
                     </div>
                 </div>
             </div>
-        @endsection
+        </div>
+    </div>
+@endsection

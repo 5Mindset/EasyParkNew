@@ -29,11 +29,11 @@ class Vehicle extends Model
 
     public function brand()
     {
-        return $this->model?->vehicleBrand; // akses langsung via model
+        return $this->model?->vehicleBrand;
     }
 
     public function vehicleType()
     {
-        return $this->model?->vehicleType;
+        return $this->model?->vehicleBrand?->vehicleType;
     }
 }

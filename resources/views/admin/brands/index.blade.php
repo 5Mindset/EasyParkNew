@@ -40,6 +40,7 @@
                                 <tr>
                                     <th style="width: 5%;">#</th>
                                     <th>Nama Merek</th>
+                                    <th>Jenis Kendaraan</th> {{-- Tambahkan kolom ini --}}
                                     <th style="width: 20%;">Aksi</th>
                                 </tr>
                             </thead>
@@ -48,6 +49,9 @@
                                     <tr>
                                         <td>{{ $vehicleBrands->firstItem() + $index }}</td>
                                         <td class="fw-semibold">{{ $brand->name }}</td>
+                                        <td>
+                                            {{ $brand->vehicleType->name ?? '-' }}
+                                        </td> {{-- Tampilkan jenis kendaraan --}}
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a href="{{ route('vehicle-brands.edit', $brand->id) }}"

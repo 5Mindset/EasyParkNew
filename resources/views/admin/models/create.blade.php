@@ -60,28 +60,6 @@
                     @enderror
                 </div>
 
-                {{-- Pilih Jenis Kendaraan --}}
-                <div class="mb-3">
-                    <label for="vehicle_type_id" class="form-label">Jenis Kendaraan</label>
-                    <select 
-                        name="vehicle_type_id" 
-                        id="vehicle_type_id" 
-                        class="form-select @error('vehicle_type_id') is-invalid @enderror" 
-                        required
-                    >
-                        <option value="">Pilih Jenis</option>
-                        @foreach ($vehicleTypes as $type)
-                            <option value="{{ $type->id }}" 
-                                {{ old('vehicle_type_id') == $type->id ? 'selected' : '' }}>
-                                {{ $type->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('vehicle_type_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 {{-- Tombol Simpan --}}
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">

@@ -44,6 +44,7 @@
                                     <th>Merk</th>
                                     <th>Jenis</th>
                                     <th>Pemilik</th>
+                                    <th>STNK</th>
                                     <th style="width: 20%;">Aksi</th>
                                 </tr>
                             </thead>
@@ -52,10 +53,17 @@
                                     <tr>
                                         <td>{{ $vehicles->firstItem() + $index }}</td>
                                         <td class="fw-semibold">{{ $vehicle->plate_number }}</td>
-                                        <td>{{ $vehicle->model->name }}</td>
+                                        <td>{{ $vehicle->model->name ?? '-' }}</td>
                                         <td>{{ $vehicle->model->vehicleBrand->name ?? '-' }}</td>
-                                        <td>{{ $vehicle->model->vehicleType->name ?? '-' }}</td>
+                                        <td>{{ $vehicle->model->vehicleBrand->vehicleType->name ?? '-' }}</td>
                                         <td>{{ $vehicle->user->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($vehicle->stnk_image)
+                                                <img src="{{ asset('storage/' . $vehicle->stnk_image) }}" alt="STNK" width="70">
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a href="{{ route('vehicles.show', $vehicle->id) }}" class="btn btn-sm btn-info">

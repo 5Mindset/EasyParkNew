@@ -32,14 +32,14 @@
                     @method('PUT')
 
                     <div class="container mt-3 mb-3">
-                        <div class="grid grid-cols-3 gap-4 mb-3">
+                        <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
                             <!-- Tipe Kendaraan -->
-                            <div class="form-group">
-                                <label for="vehicle_type_id">Tipe Kendaraan</label>
-                                <select name="vehicle_type_id" id="vehicle_type_id" class="form-control">
+                            <div class="col">
+                                <label for="vehicle_type_id" class="form-label">Tipe Kendaraan</label>
+                                <select name="vehicle_type_id" id="vehicle_type_id" class="form-select">
                                     @foreach ($types as $type)
                                         <option value="{{ $type->id }}"
-                                            {{ old('vehicle_type_id', $vehicle->model->vehicle_type_id) == $type->id ? 'selected' : '' }}>
+                                            {{ old('vehicle_type_id', $vehicle->model->vehicle_type_id ?? '') == $type->id ? 'selected' : '' }}>
                                             {{ $type->name }}
                                         </option>
                                     @endforeach
@@ -47,12 +47,12 @@
                             </div>
 
                             <!-- Merek Kendaraan -->
-                            <div class="form-group">
-                                <label for="vehicle_brand_id">Merek Kendaraan</label>
-                                <select name="vehicle_brand_id" id="vehicle_brand_id" class="form-control">
+                            <div class="col">
+                                <label for="vehicle_brand_id" class="form-label">Merek Kendaraan</label>
+                                <select name="vehicle_brand_id" id="vehicle_brand_id" class="form-select">
                                     @foreach ($brands as $brand)
                                         <option value="{{ $brand->id }}"
-                                            {{ old('vehicle_brand_id', $vehicle->model->vehicle_brand_id) == $brand->id ? 'selected' : '' }}>
+                                            {{ old('vehicle_brand_id', $vehicle->model->vehicle_brand_id ?? '') == $brand->id ? 'selected' : '' }}>
                                             {{ $brand->name }}
                                         </option>
                                     @endforeach
@@ -60,12 +60,12 @@
                             </div>
 
                             <!-- Model Kendaraan -->
-                            <div class="form-group">
-                                <label for="vehicle_model_id">Model Kendaraan</label>
-                                <select name="vehicle_model_id" id="vehicle_model_id" class="form-control">
+                            <div class="col">
+                                <label for="vehicle_model_id" class="form-label">Model Kendaraan</label>
+                                <select name="vehicle_model_id" id="vehicle_model_id" class="form-select">
                                     @foreach ($models as $model)
                                         <option value="{{ $model->id }}"
-                                            {{ old('vehicle_model_id', $vehicle->vehicle_model_id) == $model->id ? 'selected' : '' }}>
+                                            {{ old('vehicle_model_id', $vehicle->vehicle_model_id ?? '') == $model->id ? 'selected' : '' }}>
                                             {{ $model->name }}
                                         </option>
                                     @endforeach
@@ -74,9 +74,9 @@
                         </div>
 
                         <!-- Pemilik Kendaraan -->
-                        <div class="form-group mb-3">
-                            <label for="user_id">Pemilik Kendaraan (Mahasiswa)</label>
-                            <select name="user_id" id="user_id" class="form-control">
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">Pemilik Kendaraan (Mahasiswa)</label>
+                            <select name="user_id" id="user_id" class="form-select">
                                 @foreach ($users as $user)
                                     <option value="{{ $user->id }}"
                                         {{ old('user_id', $vehicle->user_id) == $user->id ? 'selected' : '' }}>
@@ -87,15 +87,15 @@
                         </div>
 
                         <!-- Nomor Plat -->
-                        <div class="form-group mb-3">
-                            <label for="plate_number">Nomor Plat</label>
+                        <div class="mb-3">
+                            <label for="plate_number" class="form-label">Nomor Plat</label>
                             <input type="text" name="plate_number" id="plate_number"
                                 value="{{ old('plate_number', $vehicle->plate_number) }}" class="form-control">
                         </div>
 
                         <!-- STNK Image -->
-                        <div class="form-group mt-4 mb-4">
-                            <label for="stnk_image" class="mb-2">STNK Image</label>
+                        <div class="mb-4">
+                            <label for="stnk_image" class="form-label">STNK Image</label>
                             <input type="file" name="stnk_image" id="stnk_image" class="form-control mb-3">
 
                             @if ($vehicle->stnk_image)

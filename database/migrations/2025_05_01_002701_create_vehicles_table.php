@@ -21,6 +21,7 @@ return new class extends Migration
         Schema::create('vehicle_brands', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -28,7 +29,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('vehicle_brand_id')->constrained()->onDelete('cascade');
-            $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -41,7 +41,6 @@ return new class extends Migration
             $table->string('qr_code')->nullable();
             $table->timestamps();
         });
-        
     }
 
     /**

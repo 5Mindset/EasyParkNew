@@ -5,9 +5,7 @@
     <div class="mb-2">
         <h3 class="fw-bold">Tambah Kendaraan</h3>
         <p class="text-muted small mb-0">
-            <a href="{{ route('vehicles.index') }}" class="text-decoration-none text-muted">
-                Kendaraan
-            </a>
+            <a href="{{ route('vehicles.index') }}" class="text-decoration-none text-muted">Kendaraan</a>
             <span class="mx-1">/</span>
             <span class="text-primary fw-semibold">Tambah</span>
         </p>
@@ -15,6 +13,7 @@
 
     <div class="card border-0 shadow rounded-4 mt-3">
         <div class="card-body p-4">
+
             {{-- Form Filter Tipe > Merek > Model --}}
             <form action="{{ route('vehicles.create') }}" method="GET" class="row mb-4">
                 <div class="col-md-4">
@@ -58,7 +57,7 @@
             <form action="{{ route('vehicles.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                {{-- Hidden input untuk menyimpan pilihan --}}
+                {{-- Hidden input untuk menyimpan pilihan filter --}}
                 <input type="hidden" name="vehicle_type_id" value="{{ request('vehicle_type_id') }}">
                 <input type="hidden" name="vehicle_brand_id" value="{{ request('vehicle_brand_id') }}">
                 <input type="hidden" name="vehicle_model_id" value="{{ request('vehicle_model_id') }}">
@@ -104,6 +103,7 @@
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>

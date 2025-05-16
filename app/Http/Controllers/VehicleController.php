@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Vehicle;
-use App\Models\VehicleType;
 use App\Models\VehicleBrand;
 use App\Models\VehicleModel;
-use App\Models\User;
+use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
 
 class VehicleController extends Controller
 {
@@ -18,11 +18,11 @@ class VehicleController extends Controller
     {
         $search = $request->query('search');
 
-        $vehicles = Vehicle::with(['model', 'user'])
+        $vehicles = Vehicle::with(['model.vehicleBrand.vehicleType', 'user'])
             ->when($search, function ($query, $search) {
                 return $query->where('plate_number', 'like', '%' . $search . '%');
             })
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('admin.vehicles.index', compact('vehicles'));
@@ -30,69 +30,51 @@ class VehicleController extends Controller
 
     public function create(Request $request)
     {
-        $types = VehicleType::orderBy('name')->get();
-        $users = User::where('role', 'Mahasiswa')->orderBy('name')->get(); // Mahasiswa
+        $types = VehicleType::all();
 
-        $brands = collect();
-        $models = collect();
+        $brands = $request->vehicle_type_id
+            ? VehicleBrand::where('vehicle_type_id', $request->vehicle_type_id)->get()
+            : collect();
 
-        if ($request->vehicle_type_id) {
-            $brands = VehicleBrand::whereHas('vehicleModels', function ($q) use ($request) {
-                $q->where('vehicle_type_id', $request->vehicle_type_id);
-            })->orderBy('name')->get();
-        }
+        $models = $request->vehicle_brand_id
+            ? VehicleModel::where('vehicle_brand_id', $request->vehicle_brand_id)->get()
+            : collect();
 
-        if ($request->vehicle_brand_id) {
-            $models = VehicleModel::where('vehicle_brand_id', $request->vehicle_brand_id)
-                ->where('vehicle_type_id', $request->vehicle_type_id)
-                ->orderBy('name')
-                ->get();
-        }
+        $users = User::all();
 
-        return view('admin.vehicles.create', compact('types', 'users', 'brands', 'models'));
-    }
-
-    public function getBrandsByType($typeId)
-    {
-        // Ambil merek kendaraan berdasarkan tipe
-        $brands = VehicleBrand::whereHas('vehicleModels', function ($query) use ($typeId) {
-            $query->where('vehicle_type_id', $typeId);
-        })->get();
-
-        return response()->json($brands);
-    }
-
-    public function getModelsByBrand($brandId)
-    {
-        // Ambil model kendaraan berdasarkan merek
-        $models = VehicleModel::where('vehicle_brand_id', $brandId)->get();
-
-        return response()->json($models);
+        return view('admin.vehicles.create', compact('types', 'brands', 'models', 'users'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'plate_number' => 'required|string|max:20|unique:vehicles',
+            'plate_number' => 'required|string|max:20|unique:vehicles,plate_number',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'user_id' => 'required|exists:users,id',
             'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        // Ambil data yang diperlukan saja
         $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id']);
+        $data['plate_number'] = strtoupper($data['plate_number']); // Ubah ke huruf kapital
 
+        // Upload gambar STNK jika ada
         if ($request->hasFile('stnk_image')) {
             $data['stnk_image'] = $request->file('stnk_image')->store('uploads/stnk', 'public');
         }
 
+        // Simpan kendaraan ke database
         $vehicle = Vehicle::create($data);
 
-        // Generate QR code
+        // Buat QR Code dengan link ke halaman detail kendaraan
         $qrPath = 'uploads/qrcodes/' . $vehicle->id . '_' . Str::random(6) . '.svg';
         $qrData = route('vehicles.show', $vehicle->id);
         $qrImage = QrCode::format('svg')->size(200)->generate($qrData);
 
+        // Simpan QR Code ke storage public
         Storage::disk('public')->put($qrPath, $qrImage);
+
+        // Update path QR Code ke database
         $vehicle->update(['qr_code' => $qrPath]);
 
         return redirect()->route('vehicles.index')->with('success', 'Data kendaraan berhasil ditambahkan.');
@@ -100,31 +82,27 @@ class VehicleController extends Controller
 
     public function show(Vehicle $vehicle)
     {
-        $vehicle->load('model', 'user');
+        $vehicle->load(['model.vehicleBrand.vehicleType', 'user']);
 
         return view('admin.vehicles.show', compact('vehicle'));
     }
 
     public function edit(Vehicle $vehicle)
     {
-        // Memuat data kendaraan dengan relasi
-        $vehicle->load('model');
+        $types = VehicleType::all();
 
-        // Ambil semua tipe kendaraan
-        $types = VehicleType::orderBy('name')->get();
+        $selectedBrand = $vehicle->model->vehicleBrand ?? null;
+        $selectedType = $selectedBrand->vehicleType ?? null;
 
-        // Ambil merek kendaraan sesuai tipe kendaraan yang sudah dipilih
-        $brands = VehicleBrand::whereHas('vehicleModels', function ($query) use ($vehicle) {
-            $query->where('vehicle_type_id', $vehicle->model->vehicle_type_id);
-        })->orderBy('name')->get();
+        $brands = $selectedType
+            ? VehicleBrand::where('vehicle_type_id', $selectedType->id)->get()
+            : collect();
 
-        // Ambil model kendaraan sesuai merek dan tipe kendaraan yang sudah dipilih
-        $models = VehicleModel::where('vehicle_brand_id', $vehicle->model->vehicle_brand_id)
-            ->where('vehicle_type_id', $vehicle->model->vehicle_type_id)
-            ->orderBy('name')->get();
+        $models = $selectedBrand
+            ? VehicleModel::where('vehicle_brand_id', $selectedBrand->id)->get()
+            : collect();
 
-        // Ambil pengguna dengan role Mahasiswa
-        $users = User::where('role', 'Mahasiswa')->orderBy('name')->get();
+        $users = User::all();
 
         return view('admin.vehicles.edit', compact('vehicle', 'types', 'brands', 'models', 'users'));
     }
@@ -135,33 +113,36 @@ class VehicleController extends Controller
             'plate_number' => 'required|string|max:20|unique:vehicles,plate_number,' . $vehicle->id,
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
             'user_id' => 'required|exists:users,id',
-            'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'stnk_image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id']);
+        $stnkPath = $vehicle->stnk_image;
 
         if ($request->hasFile('stnk_image')) {
-            $data['stnk_image'] = $request->file('stnk_image')->store('uploads/stnk', 'public');
+            if ($vehicle->stnk_image) {
+                Storage::disk('public')->delete($vehicle->stnk_image);
+            }
+            $stnkPath = $request->file('stnk_image')->store('uploads/stnk', 'public');
         }
 
-        $vehicle->update($data);
+        $vehicle->update([
+            'plate_number' => strtoupper($request->plate_number),
+            'vehicle_model_id' => $request->vehicle_model_id,
+            'user_id' => $request->user_id,
+            'stnk_image' => $stnkPath,
+        ]);
 
-        return redirect()->route('vehicles.index')->with('success', 'Data kendaraan berhasil diperbarui.');
+        return redirect()->route('vehicles.index')->with('success', 'Kendaraan berhasil diperbarui.');
     }
 
     public function destroy(Vehicle $vehicle)
     {
-        // Hapus gambar jika ada
-        if ($vehicle->stnk_image && Storage::disk('public')->exists($vehicle->stnk_image)) {
+        if ($vehicle->stnk_image) {
             Storage::disk('public')->delete($vehicle->stnk_image);
-        }
-
-        if ($vehicle->qr_code && Storage::disk('public')->exists($vehicle->qr_code)) {
-            Storage::disk('public')->delete($vehicle->qr_code);
         }
 
         $vehicle->delete();
 
-        return redirect()->route('vehicles.index')->with('success', 'Data kendaraan berhasil dihapus.');
+        return redirect()->route('vehicles.index')->with('success', 'Kendaraan berhasil dihapus.');
     }
 }

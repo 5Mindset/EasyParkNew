@@ -41,7 +41,7 @@
                                     <th style="width: 5%;">#</th>
                                     <th>Nama Model</th>
                                     <th>Merk Kendaraan</th>
-                                    <th>Jenis Kendaraan</th>
+                                    {{-- Hapus kolom jenis kendaraan --}}
                                     <th style="width: 20%;">Aksi</th>
                                 </tr>
                             </thead>
@@ -51,7 +51,7 @@
                                         <td>{{ $vehicleModels->firstItem() + $index }}</td>
                                         <td class="fw-semibold">{{ $model->name }}</td>
                                         <td>{{ $model->vehicleBrand->name }}</td>
-                                        <td>{{ $model->vehicleType->name }}</td>
+                                        {{-- Hapus kolom jenis kendaraan --}}
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a href="{{ route('vehicle-models.edit', $model->id) }}"
