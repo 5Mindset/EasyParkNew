@@ -18,6 +18,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/send-otp', [OtpController::class, 'sendOtp']);
 Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
 Route::post('/reset-password', [OtpController::class, 'resetPassword']);
+Route::get('/vehicles/{id}', [VehicleController::class, 'show']); // public access
 
 // Routes for authenticated users
 Route::middleware('auth:sanctum')->group(function () {

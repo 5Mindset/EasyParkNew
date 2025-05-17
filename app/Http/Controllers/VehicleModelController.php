@@ -29,16 +29,24 @@ class VehicleModelController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'vehicle_brand_id' => 'required|exists:vehicle_brands,id',
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'vehicle_brand_id' => 'required|exists:vehicle_brands,id',
+    ]);
 
-        VehicleModel::create($request->only('name', 'vehicle_brand_id'));
+    $brand = VehicleBrand::findOrFail($request->vehicle_brand_id); // ⬅️ fix error $brand undefined
 
-        return redirect()->route('vehicle-models.index')->with('success', 'Model kendaraan berhasil ditambahkan.');
-    }
+    VehicleModel::create([
+        'name' => $request->name,
+        'vehicle_brand_id' => $brand->id,
+        'vehicle_type_id' => $brand->vehicle_type_id, // ⬅️ now valid
+    ]);
+
+    return redirect()->route('vehicle-models.index')->with('success', 'Model kendaraan berhasil ditambahkan.');
+}
+
+
 
     public function edit(VehicleModel $vehicleModel)
     {

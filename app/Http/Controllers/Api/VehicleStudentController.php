@@ -16,7 +16,7 @@ class VehicleStudentController extends Controller
     {
         try {
             $userId = auth()->id();
-            $vehicles = Vehicle::with('model.vehicle_brand', 'model.vehicle_type')
+            $vehicles = Vehicle::with('model.vehicleBrand', 'model.vehicleType')
                 ->where('user_id', $userId)
                 ->get();
             return response()->json($vehicles);
@@ -31,45 +31,45 @@ class VehicleStudentController extends Controller
     }
 
     public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'plate_number' => 'required|string|max:20|unique:vehicles,plate_number',
-            'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+    {
+        try {
+            $request->validate([
+                'plate_number' => 'required|string|max:20|unique:vehicles,plate_number',
+                'vehicle_model_id' => 'required|exists:vehicle_models,id',
+                'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
 
-        $data = $request->only(['plate_number', 'vehicle_model_id']);
-        $data['user_id'] = auth()->id();
+            $data = $request->only(['plate_number', 'vehicle_model_id']);
+            $data['user_id'] = auth()->id();
 
-        if ($request->hasFile('stnk_image')) {
-            $data['stnk_image'] = $request->file('stnk_image')->store('uploads/stnk_images', 'public');
+            if ($request->hasFile('stnk_image')) {
+                $data['stnk_image'] = $request->file('stnk_image')->store('uploads/stnk_images', 'public');
+            }
+
+            $vehicle = Vehicle::create($data);
+
+            // 🔗 Generate QR Code
+            $qrPath = 'uploads/qrcodes/' . $vehicle->id . '_' . Str::random(6) . '.svg';
+            $qrData = url('/vehicles/' . $vehicle->id); // Sesuaikan jika perlu
+            $qrImage = QrCode::format('svg')->size(200)->generate($qrData);
+            Storage::disk('public')->put($qrPath, $qrImage);
+            $vehicle->update(['qr_code' => $qrPath]);
+
+            return response()->json($vehicle->load('model.vehicleBrand', 'model.vehicleType'), 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating vehicle: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create vehicle',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $vehicle = Vehicle::create($data);
-
-        // 🔗 Generate QR Code
-        $qrPath = 'uploads/qrcodes/' . $vehicle->id . '_' . Str::random(6) . '.svg';
-        $qrData = url('/vehicles/' . $vehicle->id); // sesuaikan jika perlu
-        $qrImage = QrCode::format('svg')->size(200)->generate($qrData);
-        Storage::disk('public')->put($qrPath, $qrImage);
-        $vehicle->update(['qr_code' => $qrPath]);
-
-        return response()->json($vehicle->load('model'), 201);
-    } catch (\Exception $e) {
-        Log::error('Error creating vehicle: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to create vehicle',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
     public function show($id)
     {
         try {
-            $vehicle = Vehicle::with('model.vehicle_brand', 'model.vehicle_type')
+            $vehicle = Vehicle::with('model.vehicleBrand', 'model.vehicleType')
                 ->where('id', $id)
                 ->where('user_id', auth()->id())
                 ->firstOrFail();
@@ -105,7 +105,8 @@ class VehicleStudentController extends Controller
             }
 
             $vehicle->update($data);
-            return response()->json($vehicle->load('model'));
+
+            return response()->json($vehicle->load('model.vehicleBrand', 'model.vehicleType'));
         } catch (\Exception $e) {
             Log::error('Error updating vehicle: ' . $e->getMessage());
             return response()->json([

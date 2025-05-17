@@ -38,6 +38,12 @@ class VehicleBrandController extends Controller
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
         ]);
 
+        $request->validate([
+            'name' => 'required|unique:vehicle_brands,name',
+            'vehicle_type_id' => 'required|exists:vehicle_types,id',
+        ]);
+
+
         VehicleBrand::create($request->only('name', 'vehicle_type_id'));
 
         return redirect()->route('vehicle-brands.index')->with('success', 'Merek kendaraan berhasil ditambahkan!');

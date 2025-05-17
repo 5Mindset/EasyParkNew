@@ -18,8 +18,8 @@ class VehicleController extends Controller
     {
         $user = $request->user();
         return Vehicle::where('user_id', $user->id)
-                      ->with(['model.vehicle_brand', 'model.vehicle_type'])
-                      ->get();
+            ->with(['model.vehicleBrand', 'model.vehicleType'])
+            ->get();
     }
 
     public function store(Request $request)
@@ -44,7 +44,12 @@ class VehicleController extends Controller
 
     public function show($id)
     {
-        $vehicle = Vehicle::with(['model', 'user'])->findOrFail($id);
+        $vehicle = Vehicle::with(['model.vehicleBrand', 'model.vehicleType'])->find($id);
+
+        if (!$vehicle) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
+
         return response()->json($vehicle);
     }
 
@@ -52,8 +57,8 @@ class VehicleController extends Controller
     {
         $user = $request->user();
         $vehicle = Vehicle::where('user_id', $user->id)
-                          ->with(['model.vehicle_brand', 'model.vehicle_type'])
-                          ->findOrFail($id);
+            ->with(['model.vehicleBrand', 'model.vehicleType'])
+            ->findOrFail($id);
         return response()->json($vehicle);
     }
 
@@ -80,16 +85,5 @@ class VehicleController extends Controller
 
         $vehicle->update($data);
         return response()->json($vehicle->load(['model', 'user']));
-    }
-
-    public function destroy($id)
-    {
-        $vehicle = Vehicle::findOrFail($id);
-        if ($vehicle->stnk_image) {
-            Storage::disk('public')->delete($vehicle->stnk_image);
-        }
-        $vehicle->delete();
-
-        return response()->json(null, 204);
     }
 }

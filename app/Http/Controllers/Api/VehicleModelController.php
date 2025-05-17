@@ -11,7 +11,7 @@ class VehicleModelController extends Controller
 {
     public function index()
     {
-        return VehicleModel::with(['vehicle_brand', 'vehicle_type'])->get();
+        return VehicleModel::with(['vehicleBrand', 'vehicleType'])->get();
     }
 
     public function store(Request $request)
@@ -28,7 +28,7 @@ class VehicleModelController extends Controller
             ]);
 
             $vehicleModel = VehicleModel::create($request->only(['name', 'vehicle_brand_id', 'vehicle_type_id']));
-            $vehicleModel->loadMissing(['vehicle_brand', 'vehicle_type']);
+            $vehicleModel->loadMissing(['vehicleBrand', 'vehicleType']);
 
             return response()->json([
                 'success' => true,
@@ -54,7 +54,7 @@ class VehicleModelController extends Controller
 
     public function show($id)
     {
-        $vehicleModel = VehicleModel::with(['vehicle_brand', 'vehicle_type'])->findOrFail($id);
+        $vehicleModel = VehicleModel::with(['vehicleBrand', 'vehicleType'])->findOrFail($id);
         return response()->json($vehicleModel);
     }
 
@@ -70,7 +70,7 @@ class VehicleModelController extends Controller
             ]);
 
             $vehicleModel->update($request->only(['name', 'vehicle_brand_id', 'vehicle_type_id']));
-            $vehicleModel->load(['vehicle_brand', 'vehicle_type']);
+            $vehicleModel->load(['vehicleBrand', 'vehicleType ']);
 
             return response()->json([
                 'success' => true,
@@ -115,7 +115,7 @@ class VehicleModelController extends Controller
     {
         try {
             $models = VehicleModel::where('vehicle_brand_id', $brandId)
-                ->with(['vehicle_brand', 'vehicle_type'])
+                ->with(['vehicleBrand', 'vehicleType'])
                 ->get();
 
             return response()->json($models, 200);
