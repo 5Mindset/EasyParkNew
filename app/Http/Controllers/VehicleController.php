@@ -14,6 +14,15 @@ use Illuminate\Support\Str;
 
 class VehicleController extends Controller
 {
+    const MAX_PARKING_AREA = 896.0;
+
+    public function getCurrentUsedArea()
+    {
+        return Vehicle::with('model.vehicle_type')->get()->sum(function ($vehicle) {
+            return $vehicle->model->vehicle_type->area_size ?? 0;
+        });
+    }
+
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -54,31 +63,42 @@ class VehicleController extends Controller
             'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ambil data yang diperlukan saja
-        $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id']);
-        $data['plate_number'] = strtoupper($data['plate_number']); // Ubah ke huruf kapital
+        // Validasi kapasitas parkir berdasarkan luas
+        $currentUsedArea = $this->getCurrentUsedArea();
 
-        // Upload gambar STNK jika ada
+        $model = VehicleModel::with('vehicleType')->find($request->vehicle_model_id);
+
+        if (!$model || !$model->vehicleType) {
+            return redirect()->back()->with('error', 'Tipe kendaraan tidak ditemukan.');
+        }
+
+        $newArea = $model->vehicleType->area_size;
+
+        if (($currentUsedArea + $newArea) > self::MAX_PARKING_AREA) {
+            return redirect()->back()->with('error', 'Kapasitas parkir penuh. Tidak bisa menambahkan kendaraan baru.');
+        }
+
+        // Simpan data kendaraan
+        $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id']);
+        $data['plate_number'] = strtoupper($data['plate_number']); // Kapital
+
         if ($request->hasFile('stnk_image')) {
             $data['stnk_image'] = $request->file('stnk_image')->store('uploads/stnk', 'public');
         }
 
-        // Simpan kendaraan ke database
         $vehicle = Vehicle::create($data);
 
-        // Buat QR Code dengan link ke halaman detail kendaraan
+        // Buat QR Code
         $qrPath = 'uploads/qrcodes/' . $vehicle->id . '_' . Str::random(6) . '.svg';
         $qrData = route('vehicles.show', $vehicle->id);
         $qrImage = QrCode::format('svg')->size(200)->generate($qrData);
 
-        // Simpan QR Code ke storage public
         Storage::disk('public')->put($qrPath, $qrImage);
-
-        // Update path QR Code ke database
         $vehicle->update(['qr_code' => $qrPath]);
 
         return redirect()->route('vehicles.index')->with('success', 'Data kendaraan berhasil ditambahkan.');
     }
+
 
     public function show(Vehicle $vehicle)
     {
