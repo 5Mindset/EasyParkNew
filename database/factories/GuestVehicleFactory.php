@@ -1,27 +1,28 @@
 <?php
+
 namespace Database\Factories;
 
 use App\Models\GuestVehicle;
 use App\Models\VehicleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class GuestVehicleFactory extends Factory
 {
     protected $model = GuestVehicle::class;
 
-    public function definition(): array
+    public function definition()
     {
-        $vehicleType = VehicleType::inRandomOrder()->first();
+        $entry = $this->faker->dateTimeBetween('-1 days', 'now');
+        $exit = (clone $entry)->modify('+'.rand(1, 3).' hours');
 
         return [
-            'plate_number' => strtoupper('N ' . fake()->unique()->numberBetween(1000, 9999) . ' ' . Str::upper(fake()->randomLetter()) . Str::upper(fake()->randomLetter())),
-            'owner_name' => fake()->name(),
-            'vehicle_type_id' => $vehicleType?->id ?? 1, // fallback jika kosong
-            'entry_time' => fake()->dateTimeThisYear(),
-            'exit_time' => fake()->boolean(30) ? fake()->dateTimeThisYear() : null,
-            'status' => fake()->randomElement(['parked', 'exited']),
+            'owner_name' => $this->faker->name(),
+            'plate_number' => strtoupper($this->faker->bothify('N #### ??')), // contoh: N 1234 AB
+            'vehicle_type_id' => VehicleType::inRandomOrder()->first()?->id ?? VehicleType::factory(),
+            'entry_time' => $entry,
+            'exit_time' => $this->faker->boolean(70) ? $exit : null, // 70% sudah keluar
+            'status' => $this->faker->randomElement(['masuk', 'keluar']),
         ];
     }
 }
-

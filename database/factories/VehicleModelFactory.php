@@ -4,19 +4,17 @@ namespace Database\Factories;
 
 use App\Models\VehicleModel;
 use App\Models\VehicleBrand;
-use App\Models\VehicleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VehicleModelFactory extends Factory
 {
     protected $model = VehicleModel::class;
 
-    public function definition(): array
+    public function definition()
     {
         return [
-            'name' => $this->faker->unique()->word(),
+            'name' => $this->faker->bothify('Model-###'), 
             'vehicle_brand_id' => VehicleBrand::inRandomOrder()->first()?->id ?? VehicleBrand::factory(),
-            'vehicle_type_id' => VehicleType::inRandomOrder()->first()?->id ?? VehicleType::factory(),
         ];
     }
 }

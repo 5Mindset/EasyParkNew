@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ParkingRecordFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = ParkingRecord::class;
+
+    public function definition()
     {
+        $entry = $this->faker->dateTimeBetween('-2 days', 'now');
+        $hasExited = $this->faker->boolean(70); 
+
         return [
-            'vehicle_id' => Vehicle::factory(),
-            'entry_time' => $this->faker->dateTimeThisYear(),
-            'exit_time' => $this->faker->dateTimeThisYear(),
-            'status' => $this->faker->randomElement(['parked', 'exited']), // Pilih status yang valid
+            'vehicle_id' => Vehicle::inRandomOrder()->first()?->id ?? Vehicle::factory(),
+            'entry_time' => $entry,
+            'exit_time' => $hasExited ? (clone $entry)->modify('+'.rand(1, 5).' hours') : null,
+            'status' => $hasExited ? 'keluar' : 'masuk',
         ];
     }
 }

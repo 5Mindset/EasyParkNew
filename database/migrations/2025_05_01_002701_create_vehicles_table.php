@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('vehicle_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); 
-            $table->unsignedInteger('max_parking')->default(0);
+            $table->string('name')->unique();
+            $table->float('area_size')->default(1.3);
             $table->timestamps();
         });
 
         Schema::create('vehicle_brands', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('vehicle_type_id');
+            $table->foreign('vehicle_type_id')->references('id')->on('vehicle_types')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -37,7 +38,7 @@ return new class extends Migration
             $table->string('plate_number')->unique();
             $table->foreignId('vehicle_model_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('stnk_image')->nullable(); 
+            $table->string('stnk_image')->nullable();
             $table->string('qr_code')->nullable();
             $table->timestamps();
         });

@@ -3,38 +3,48 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
-    protected static ?string $password = null;
+    protected $model = User::class;
 
     public function definition(): array
     {
+        $role = $this->faker->randomElement(['admin', 'petugas', 'mahasiswa']);
+
         return [
-            'name' => $this->faker->userName(), // atau gunakan sesuai kebutuhan
-            'nim' => 'E' . $this->faker->unique()->numerify('2025####'),
-            'full_name' => $this->faker->name(),
+            'full_name' => $fullName = $this->faker->name(),
+            'nim' => $this->generateIdentity($role),
             'email' => $this->faker->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'phone_number' => $this->faker->unique()->numerify('08##########'),
+            'password' => bcrypt('password'), // default password
+            'phone_number' => '08' . $this->faker->numerify('##########'),
             'address' => $this->faker->address(),
-            'date_of_birth' => $this->faker->date('Y-m-d', '2005-01-01'),
-            'image' => 'uploads/users/default.png',
-            'role' => $this->faker->randomElement(['admin', 'petugas', 'mahasiswa']),
-            'remember_token' => Str::random(10),
+            'date_of_birth' => $this->faker->date('Y-m-d', '-18 years'),
+            'image' => 'uploads/users/' . $this->faker->uuid . '.jpg',
+            'role' => $role,
         ];
     }
 
-    public function unverified(): static
+    /**
+     * Generate NIM or NIP based on role.
+     * Return null for admin (nullable string).
+     *
+     * @param string $role
+     * @return string|null
+     */
+    private function generateIdentity(string $role): ?string
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        if ($role === 'mahasiswa') {
+            return 'E' . now()->format('Y') . $this->faker->numerify('####');
+        } elseif ($role === 'petugas') {
+            return $this->faker->numerify('##################'); // 18 digit angka untuk NIP
+        } else {
+            return null; // Admin tidak punya nim/nip
+        }
     }
 }

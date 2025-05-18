@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VehicleType extends Model
 {
-    protected $fillable = ['name', 'max_parking'];
+    protected $fillable = ['name', 'area_size'];
 
     public function brands()
     {
