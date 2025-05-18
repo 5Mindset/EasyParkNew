@@ -10,7 +10,9 @@ class GuestVehicleController extends Controller
 {
     public function index()
     {
-        return GuestVehicle::with('vehicleModel')->get();
+        return GuestVehicle::with('vehicleType')
+            ->where('status', 'parked')
+            ->get();
     }
 
     public function store(Request $request)
@@ -18,20 +20,27 @@ class GuestVehicleController extends Controller
         $request->validate([
             'plate_number' => 'required|string|max:20|unique:guest_vehicles,plate_number',
             'owner_name' => 'required|string|max:100',
-            'vehicle_model_id' => 'required|exists:vehicle_models,id',
+            'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'entry_time' => 'nullable|date',
             'exit_time' => 'nullable|date|after_or_equal:entry_time',
             'status' => 'required|in:parked,exited',
         ]);
 
-        $guestVehicle = GuestVehicle::create($request->all());
+        $guestVehicle = GuestVehicle::create([
+            'plate_number' => $request->plate_number,
+            'owner_name' => $request->owner_name,
+            'vehicle_type_id' => $request->vehicle_type_id,
+            'entry_time' => $request->entry_time ?? now(),
+            'exit_time' => $request->exit_time,
+            'status' => $request->status,
+        ]);
 
-        return response()->json($guestVehicle->load('vehicleModel'), 201);
+        return response()->json($guestVehicle->load('vehicleType'), 201);
     }
 
     public function show($id)
     {
-        $guestVehicle = GuestVehicle::with('vehicleModel')->findOrFail($id);
+        $guestVehicle = GuestVehicle::with('vehicleType')->findOrFail($id);
         return response()->json($guestVehicle);
     }
 
@@ -42,15 +51,22 @@ class GuestVehicleController extends Controller
         $request->validate([
             'plate_number' => 'required|string|max:20|unique:guest_vehicles,plate_number,' . $guestVehicle->id,
             'owner_name' => 'required|string|max:100',
-            'vehicle_model_id' => 'required|exists:vehicle_models,id',
+            'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'entry_time' => 'nullable|date',
             'exit_time' => 'nullable|date|after_or_equal:entry_time',
             'status' => 'required|in:parked,exited',
         ]);
 
-        $guestVehicle->update($request->all());
+        $guestVehicle->update([
+            'plate_number' => $request->plate_number,
+            'owner_name' => $request->owner_name,
+            'vehicle_type_id' => $request->vehicle_type_id,
+            'entry_time' => $request->entry_time,
+            'exit_time' => $request->exit_time,
+            'status' => $request->status,
+        ]);
 
-        return response()->json($guestVehicle->load('vehicleModel'));
+        return response()->json($guestVehicle->load('vehicleType'));
     }
 
     public function destroy($id)
@@ -59,5 +75,26 @@ class GuestVehicleController extends Controller
         $guestVehicle->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function exitVehicle($id)
+    {
+        $guestVehicle = GuestVehicle::findOrFail($id);
+
+        if ($guestVehicle->status === 'exited') {
+            return response()->json([
+                'message' => 'Kendaraan sudah keluar sebelumnya.'
+            ], 400);
+        }
+
+        $guestVehicle->update([
+            'status' => 'exited',
+            'exit_time' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Status kendaraan berhasil diubah menjadi exited.',
+            'data' => $guestVehicle->load('vehicleType'),
+        ]);
     }
 }
