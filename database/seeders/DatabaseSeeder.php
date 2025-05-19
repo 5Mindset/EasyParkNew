@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             VehicleSeeder::class,
             ParkingRecordSeeder::class,
             GuestVehicleSeeder::class,
-            // Seeder lain jika ada 
+            ParkingAreaSeeder::class,
         ]);
     }
 }

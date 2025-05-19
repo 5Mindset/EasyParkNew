@@ -10,6 +10,7 @@ use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\GuestVehicleController;
 use App\Http\Controllers\ParkingRecordController;
+use App\Http\Controllers\ParkingAreaController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,7 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     Route::resource('students', StudentController::class);
     Route::resource('guest-vehicles', GuestVehicleController::class);
     Route::resource('parking-records', ParkingRecordController::class);
+    Route::resource('parking-areas', ParkingAreaController::class);
 });
 
 Route::middleware(['auth'])->group(function () {

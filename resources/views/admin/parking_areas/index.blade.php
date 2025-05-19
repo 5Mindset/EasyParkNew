@@ -3,20 +3,20 @@
 @section('content')
     <div class="container py-5">
         {{-- Judul --}}
-        <h4 class="fw-bold mb-3">Daftar Jenis Kendaraan</h4>
+        <h4 class="fw-bold mb-3">Daftar Area Parkir</h4>
 
         {{-- Baris: Tambah dan Search --}}
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             {{-- Tombol Tambah --}}
-            <a href="{{ route('vehicle-types.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
+            <a href="{{ route('parking-areas.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
                 <i class="bi bi-plus-circle"></i>
-                <span>Tambah Jenis</span>
+                <span>Tambah Area</span>
             </a>
 
             {{-- Form Search --}}
-            <form action="{{ route('vehicle-types.index') }}" method="GET" class="position-relative"
+            <form action="{{ route('parking-areas.index') }}" method="GET" class="position-relative"
                 style="max-width: 250px; width: 100%;">
-                <input type="text" name="search" class="form-control ps-5" placeholder="Cari jenis kendaraan..."
+                <input type="text" name="search" class="form-control ps-5" placeholder="Cari nama area..."
                     value="{{ request('search') }}">
                 <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
             </form>
@@ -33,32 +33,32 @@
         {{-- Tabel --}}
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body p-4">
-                @if ($vehicleTypes->count())
+                @if ($parkingAreas->count())
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 5%;">#</th>
-                                    <th>Nama Jenis</th>
-                                    <th>Ukuran Area (m²)</th>
+                                    <th>Nama Area</th>
+                                    <th>Maks. Area (m²)</th>
                                     <th style="width: 20%;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($vehicleTypes as $index => $type)
+                                @foreach ($parkingAreas as $index => $area)
                                     <tr>
-                                        <td>{{ $vehicleTypes->firstItem() + $index }}</td>
-                                        <td class="fw-semibold">{{ $type->name }}</td>
-                                        <td>{{ $type->area_size ?? '-' }}</td>
+                                        <td>{{ $parkingAreas->firstItem() + $index }}</td>
+                                        <td class="fw-semibold">{{ $area->name }}</td>
+                                        <td>{{ $area->max_area }}</td>
                                         <td>
                                             <div class="d-flex gap-2">
-                                                <a href="{{ route('vehicle-types.edit', $type->id) }}"
+                                                <a href="{{ route('parking-areas.edit', $area->id) }}"
                                                     class="btn btn-sm btn-warning">
                                                     <i class="bi bi-pencil-square"></i> Edit
                                                 </a>
-                                                <form action="{{ route('vehicle-types.destroy', $type->id) }}"
+                                                <form action="{{ route('parking-areas.destroy', $area->id) }}"
                                                     method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus jenis ini?')">
+                                                    onsubmit="return confirm('Yakin ingin menghapus area ini?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-sm btn-danger" type="submit">
@@ -75,12 +75,12 @@
 
                     {{-- Pagination Tailwind --}}
                     <div class="mt-3">
-                        {{ $vehicleTypes->withQueryString()->links('pagination::tailwind') }}
+                        {{ $parkingAreas->withQueryString()->links('pagination::tailwind') }}
                     </div>
                 @else
                     <div class="text-center text-muted py-4">
                         <i class="bi bi-info-circle fs-4"></i>
-                        <p class="mt-2 mb-0">Tidak ada data jenis kendaraan yang ditemukan.</p>
+                        <p class="mt-2 mb-0">Tidak ada data area parkir yang ditemukan.</p>
                     </div>
                 @endif
             </div>

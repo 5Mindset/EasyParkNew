@@ -54,6 +54,11 @@
                         <i class="bi bi-circle"></i><span>Kendaraan</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('parking-areas.index') }}">
+                        <i class="bi bi-circle"></i><span>Area Parkir</span>
+                    </a>
+                </li>
             </ul>
         </li><!-- End Forms Nav -->        
 

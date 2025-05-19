@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Routes for Admin only
-Route::middleware(['auth:sanctum', 'roleApi:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'roleApi:admin,'])->group(function () {
     Route::apiResource('vehicle-types', VehicleTypeController::class);
     Route::apiResource('vehicle-brands', VehicleBrandController::class);
     Route::apiResource('vehicle-models', VehicleModelController::class);
@@ -47,7 +47,7 @@ Route::middleware(['auth:sanctum', 'roleApi:admin'])->group(function () {
 });
 
 // Routes for Mahasiswa only
-Route::middleware(['auth:sanctum', 'roleApi:mahasiswa'])->group(function () {
+Route::middleware(['auth:sanctum', 'roleApi:mahasiswa,petugas'])->group(function () {
     Route::apiResource('my-vehicles', VehicleStudentController::class);
     Route::get('/vehicle-types', [VehicleTypeController::class, 'index']);
     Route::get('/vehicle-brands', [VehicleBrandController::class, 'index']);

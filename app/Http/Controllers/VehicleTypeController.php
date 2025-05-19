@@ -28,9 +28,13 @@ class VehicleTypeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'area_size' => 'nullable|numeric|min:0', // ditambahkan validasi untuk area_size
         ]);
 
-        VehicleType::create($request->all());
+        VehicleType::create([
+            'name' => $request->name,
+            'area_size' => $request->area_size,
+        ]);
 
         return redirect()->route('vehicle-types.index')
             ->with('success', 'Jenis kendaraan berhasil ditambahkan.');
@@ -45,9 +49,13 @@ class VehicleTypeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'area_size' => 'nullable|numeric|min:0', // validasi update
         ]);
 
-        $vehicleType->update($request->all());
+        $vehicleType->update([
+            'name' => $request->name,
+            'area_size' => $request->area_size,
+        ]);
 
         return redirect()->route('vehicle-types.index')
             ->with('success', 'Jenis kendaraan berhasil diperbarui.');

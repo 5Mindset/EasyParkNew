@@ -61,7 +61,7 @@
                 <input type="hidden" name="vehicle_type_id" value="{{ request('vehicle_type_id') }}">
                 <input type="hidden" name="vehicle_brand_id" value="{{ request('vehicle_brand_id') }}">
                 <input type="hidden" name="vehicle_model_id" value="{{ request('vehicle_model_id') }}">
-
+                
                 <div class="mb-3">
                     <label for="plate_number" class="form-label">Nomor Plat Kendaraan</label>
                     <input type="text" name="plate_number" id="plate_number"

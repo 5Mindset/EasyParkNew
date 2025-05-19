@@ -38,6 +38,24 @@
                     @enderror
                 </div>
 
+                {{-- Input Area Size --}}
+                <div class="mb-3">
+                    <label for="area_size" class="form-label">Ukuran Area (m²)</label>
+                    <input 
+                        type="number" 
+                        step="0.01"
+                        min="0"
+                        name="area_size" 
+                        id="area_size" 
+                        class="form-control @error('area_size') is-invalid @enderror" 
+                        placeholder="Contoh: 2.5"
+                        value="{{ old('area_size') }}"
+                    >
+                    @error('area_size')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 {{-- Tombol Simpan --}}
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">
