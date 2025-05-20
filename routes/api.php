@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Routes for Admin only
-Route::middleware(['auth:sanctum', 'roleApi:admin,'])->group(function () {
+Route::middleware(['auth:sanctum', 'roleApi:admin,petugas'])->group(function () {
     Route::apiResource('vehicle-types', VehicleTypeController::class);
     Route::apiResource('vehicle-brands', VehicleBrandController::class);
     Route::apiResource('vehicle-models', VehicleModelController::class);
