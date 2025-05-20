@@ -30,7 +30,7 @@
                         {{-- Info Kendaraan --}}
                         <div class="row mb-4">
                             @foreach ([
-                                'Nama Pemilik' => $guestVehicle->owner_name,
+                                'Nama' => $guestVehicle->name,
                                 'Jenis Kendaraan' => $guestVehicle->vehicleType->name ?? '-',
                                 'Status' => ucfirst($guestVehicle->status),
                                 'Waktu Masuk' => $guestVehicle->entry_time,

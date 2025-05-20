@@ -14,7 +14,7 @@ class GuestVehicleSeeder extends Seeder
     public function run(): void
     {
         GuestVehicle::create([
-            'owner_name' => 'Budi Santoso',
+            'name' => 'Budi Santoso',
             'plate_number' => 'N 1234 AB',
             'vehicle_type_id' => 1, 
             'entry_time' => Carbon::now()->subHours(2),
@@ -23,7 +23,7 @@ class GuestVehicleSeeder extends Seeder
         ]);
 
         GuestVehicle::create([
-            'owner_name' => 'Siti Aminah',
+            'name' => 'Siti Aminah',
             'plate_number' => 'N 5678 CD',
             'vehicle_type_id' => 2,
             'entry_time' => Carbon::now()->subHours(3),

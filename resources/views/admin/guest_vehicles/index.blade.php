@@ -53,7 +53,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Plat Nomor</th>
-                                    <th>Nama Pemilik</th>
+                                    <th>Nama</th>
                                     <th>Jenis Kendaraan</th>
                                     <th>Status</th>
                                     <th>Masuk</th>
@@ -66,7 +66,7 @@
                                     <tr>
                                         <td>{{ $guestVehicles->firstItem() + $index }}</td>
                                         <td class="fw-semibold">{{ $vehicle->plate_number }}</td>
-                                        <td>{{ $vehicle->owner_name }}</td>
+                                        <td>{{ $vehicle->name }}</td>
                                         <td>{{ $vehicle->vehicleType->name ?? '-' }}</td>
                                         <td>
                                             <span

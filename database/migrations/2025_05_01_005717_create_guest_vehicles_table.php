@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('guest_vehicles', function (Blueprint $table) {
             $table->id();
             $table->string('plate_number', 20)->unique();
-            $table->string('owner_name', 100);
+            $table->string('name', 100);
             $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();

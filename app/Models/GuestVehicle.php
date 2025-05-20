@@ -11,7 +11,7 @@ class GuestVehicle extends Model
     use HasFactory;
 
     protected $fillable = [
-        'owner_name',
+        'name',
         'plate_number',
         'vehicle_type_id',
         'entry_time',
