@@ -54,4 +54,23 @@ class ParkingRecordController extends Controller
 
         return response()->json(null, 204);
     }
+     public function active()
+{
+    $records = ParkingRecord::with(['vehicle', 'vehicle.user'])
+        ->whereNull('exit_time') // hanya kendaraan yang belum keluar
+        ->get()
+        ->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'vehicle_id' => $record->vehicle_id,
+                'plate_number' => $record->vehicle->plate_number ?? null,
+                'owner_name' => $record->vehicle->user->name ?? null,
+                'entry_time' => $record->entry_time,
+                'status' => $record->status,
+            ];
+        });
+
+    return response()->json($records);
+}
+
 }

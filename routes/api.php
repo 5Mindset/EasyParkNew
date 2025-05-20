@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Routes for Admin only
+// Routes for Admin & Petugas
 Route::middleware(['auth:sanctum', 'roleApi:admin,petugas'])->group(function () {
     Route::apiResource('vehicle-types', VehicleTypeController::class);
     Route::apiResource('vehicle-brands', VehicleBrandController::class);
@@ -37,15 +38,16 @@ Route::middleware(['auth:sanctum', 'roleApi:admin,petugas'])->group(function () 
     Route::apiResource('vehicles', VehicleController::class);
     Route::apiResource('guest-vehicles', GuestVehicleController::class);
     Route::apiResource('parking-records', ParkingRecordController::class);
-    Route::get('/vehicle-brands/by-type/{typeId}', [VehicleBrandController::class, 'getByType']);
-    Route::get('/vehicle-models/by-brand/{brandId}', [VehicleModelController::class, 'getByBrand']);
+
+    // Tambahan baru
+    Route::get('parking-records/active', [ParkingRecordController::class, 'active']);
+
+    Route::put('guest-vehicles/{id}/exit', [GuestVehicleController::class, 'exitVehicle']);
+
     Route::get('/user', function (Request $request) {
-        return response()->json([
-            'user' => $request->user()
-        ]);
+        return response()->json(['user' => $request->user()]);
     });
 });
-
 // Routes for Mahasiswa only
 Route::middleware(['auth:sanctum', 'roleApi:mahasiswa,petugas'])->group(function () {
     Route::apiResource('my-vehicles', VehicleStudentController::class);
