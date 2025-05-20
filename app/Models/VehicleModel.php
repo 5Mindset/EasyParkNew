@@ -25,6 +25,6 @@ class VehicleModel extends Model
 
     public function vehicleType()
     {
-        return $this->belongsTo(VehicleType::class);
+        return $this->hasOneThrough(VehicleType::class, VehicleBrand::class, 'id', 'id', 'vehicle_brand_id', 'vehicle_type_id');
     }
 }
