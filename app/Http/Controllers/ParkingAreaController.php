@@ -33,8 +33,9 @@ class ParkingAreaController extends Controller
 
         ParkingArea::create([
             'name' => $request->name,
-            'max_area' => $request->max_area,
+            'max_area' => (float) $request->max_area,
         ]);
+
 
         return redirect()->route('parking-areas.index')
             ->with('success', 'Area parkir berhasil ditambahkan.');
@@ -54,8 +55,9 @@ class ParkingAreaController extends Controller
 
         $parkingArea->update([
             'name' => $request->name,
-            'max_area' => $request->max_area,
+            'max_area' => (float) $request->max_area,
         ]);
+
 
         return redirect()->route('parking-areas.index')
             ->with('success', 'Area parkir berhasil diperbarui.');

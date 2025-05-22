@@ -8,6 +8,11 @@ use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\VehicleType;
+use App\Models\ParkingArea;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
 
 class ParkingRecordController extends Controller
 {
@@ -149,11 +154,16 @@ class ParkingRecordController extends Controller
     public function scan(Request $request)
     {
         $vehicleId = $request->input('vehicle_id');
-        $parkingAreaId = $request->input('parking_area_id');
+        $parkingAreaId = $request->input('parking_area_id', 1); // default ke 1
 
-        $vehicle = Vehicle::find($vehicleId);
+        $vehicle = Vehicle::with('model.vehicleBrand.vehicleType')->find($vehicleId);
         if (!$vehicle) {
             return response()->json(['message' => 'Kendaraan tidak ditemukan'], 404);
+        }
+
+        $vehicleType = $vehicle->model->vehicleBrand->vehicleType ?? null;
+        if (!$vehicleType) {
+            return response()->json(['message' => 'Tipe kendaraan tidak ditemukan'], 422);
         }
 
         $activeRecord = ParkingRecord::where('vehicle_id', $vehicleId)
@@ -161,33 +171,126 @@ class ParkingRecordController extends Controller
             ->where('status', 'parked')
             ->first();
 
+        $parkingArea = ParkingArea::find($parkingAreaId);
+        if (!$parkingArea) {
+            return response()->json(['message' => 'Area parkir tidak ditemukan'], 404);
+        }
+
         if ($activeRecord) {
-            $activeRecord->exit_time = now();
-            $activeRecord->status = 'exited';
-            $activeRecord->save();
+            // Kendaraan keluar
+            return $this->handleVehicleExit($parkingArea, $vehicleType, $activeRecord);
+        } else {
+            // Kendaraan masuk
+            return $this->handleVehicleEntry($vehicleType, $vehicleId, $parkingAreaId);
+        }
+    }
+
+    private function handleVehicleExit($parkingArea, $vehicleType, $activeRecord)
+    {
+        try {
+            DB::transaction(function () use ($parkingArea, $vehicleType, $activeRecord) {
+                Log::info('Vehicle exit - adding area back', [
+                    'current_max_area' => $parkingArea->max_area,
+                    'vehicle_area_size' => $vehicleType->area_size,
+                ]);
+
+                $parkingArea->max_area = (float) $parkingArea->max_area + (float) $vehicleType->area_size;
+                $parkingArea->save();
+
+                $activeRecord->exit_time = now();
+                $activeRecord->status = 'exited';
+                $activeRecord->save();
+
+                Log::info('Vehicle exit completed', [
+                    'new_max_area' => $parkingArea->max_area,
+                    'record_id' => $activeRecord->id,
+                ]);
+            });
 
             return response()->json([
                 'message' => 'Kendaraan berhasil keluar parkir.',
                 'record' => $activeRecord->load(['vehicle.user', 'parkingArea']),
             ]);
-        } else {
-            // Cek apakah area parkir diisi
-            if (!$parkingAreaId) {
-                return response()->json(['message' => 'Parking area is required for entry'], 422);
-            }
+        } catch (\Exception $e) {
+            Log::error('Vehicle exit failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal mengeluarkan kendaraan'], 500);
+        }
+    }
 
-            $newRecord = ParkingRecord::create([
-                'vehicle_id' => $vehicleId,
-                'parking_area_id' => $parkingAreaId,
-                'entry_time' => now(),
-                'status' => 'parked',
+    private function handleVehicleEntry($vehicleType, $vehicleId, $parkingAreaId)
+    {
+        // Cek kapasitas terlebih dahulu SEBELUM transaction
+        $parkingArea = ParkingArea::find($parkingAreaId);
+        $maxArea = (float) $parkingArea->max_area;
+        $vehicleArea = (float) $vehicleType->area_size;
+
+        Log::info('Vehicle entry attempt', [
+            'current_max_area' => $maxArea,
+            'required_area' => $vehicleArea,
+            'vehicle_id' => $vehicleId
+        ]);
+
+        // Pengecekan awal - jika tidak cukup, langsung tolak
+        if ($maxArea < $vehicleArea) {
+            Log::warning('Insufficient parking capacity', [
+                'available_area' => $maxArea,
+                'required_area' => $vehicleArea
             ]);
 
             return response()->json([
-                'message' => 'Kendaraan berhasil masuk parkir.',
-                'record' => $newRecord->load(['vehicle.user', 'parkingArea']),
+                'message' => 'Kapasitas parkir tidak mencukupi. Area tersedia: ' . $maxArea . ', dibutuhkan: ' . $vehicleArea
+            ], 409);
+        }
+
+        try {
+            return DB::transaction(function () use ($vehicleType, $vehicleId, $parkingAreaId) {
+                // Lock parking area untuk mencegah race condition
+                $lockedParkingArea = ParkingArea::where('id', $parkingAreaId)->lockForUpdate()->first();
+
+                $currentMaxArea = (float) $lockedParkingArea->max_area;
+                $requiredArea = (float) $vehicleType->area_size;
+
+                // Double check di dalam transaction dengan data yang di-lock
+                if ($currentMaxArea < $requiredArea) {
+                    Log::warning('Insufficient parking capacity (double check)', [
+                        'available_area' => $currentMaxArea,
+                        'required_area' => $requiredArea
+                    ]);
+
+                    throw new \Exception('Kapasitas parkir tidak mencukupi. Area tersedia: ' . $currentMaxArea . ', dibutuhkan: ' . $requiredArea);
+                }
+
+                // Update kapasitas parkir
+                $lockedParkingArea->max_area = $currentMaxArea - $requiredArea;
+                $lockedParkingArea->save();
+
+                // Buat record parkir
+                $newRecord = ParkingRecord::create([
+                    'vehicle_id' => $vehicleId,
+                    'parking_area_id' => $parkingAreaId,
+                    'entry_time' => now(),
+                    'status' => 'parked',
+                ]);
+
+                Log::info('Vehicle entry successful', [
+                    'previous_max_area' => $currentMaxArea,
+                    'new_max_area' => $lockedParkingArea->max_area,
+                    'used_area' => $requiredArea,
+                    'record_id' => $newRecord->id
+                ]);
+
+                return response()->json([
+                    'message' => 'Kendaraan berhasil masuk parkir.',
+                    'record' => $newRecord->load(['vehicle.user', 'parkingArea']),
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('Vehicle entry failed', [
+                'error' => $e->getMessage(),
+                'vehicle_id' => $vehicleId
             ]);
+
+            return response()->json(['message' => $e->getMessage()], 409);
         }
     }
 }
-      
