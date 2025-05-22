@@ -42,14 +42,12 @@ Route::middleware(['auth:sanctum', 'roleApi:petugas,mahasiswa'])->group(function
     Route::apiResource('vehicle-models', VehicleModelController::class);
     Route::apiResource('vehicles', VehicleController::class);
     Route::apiResource('guest-vehicles', GuestVehicleController::class);
-
+        // Pindahkan 'active' sebelum apiResource parking-records
+    Route::get('parking-records/active', [ParkingRecordController::class, 'active']);
+    Route::apiResource('parking-records', ParkingRecordController::class);
     // parking-records without store (store is public)
     Route::apiResource('parking-records', ParkingRecordController::class)->except(['store']);
-
-    Route::get('parking-records/active', [ParkingRecordController::class, 'active']);
-
     Route::put('guest-vehicles/{id}/exit', [GuestVehicleController::class, 'exitVehicle']);
-
     Route::get('/user', function (Request $request) {
         return response()->json(['user' => $request->user()]);
     });
