@@ -9,7 +9,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             {{-- Tombol Tambah --}}
             <a href="{{ route('officers.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
-                <i class="bi bi-plus-circle"></i>
+                <i class="bi bi-person-plus"></i>
                 <span>Tambah Petugas</span>
             </a>
 
@@ -18,7 +18,7 @@
                 style="max-width: 250px; width: 100%;">
                 <input type="text" name="search" class="form-control ps-5" placeholder="Cari petugas..."
                     value="{{ request('search') }}">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <i class="bi bi-search-heart position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
             </form>
         </div>
 
@@ -61,7 +61,7 @@
                                                 @else
                                                     <div
                                                         class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-circle w-100 h-100">
-                                                        <i class="bi bi-person-fill"></i>
+                                                        <i class="bi bi-person-circle"></i>
                                                     </div>
                                                 @endif
                                             </div>
@@ -78,13 +78,13 @@
                                                 {{-- Aksi Lihat --}}
                                                 <a href="{{ route('officers.show', $officer->id) }}"
                                                     class="btn btn-sm btn-info">
-                                                    <i class="bi bi-eye"></i> Lihat
+                                                    <i class="bi bi-eye-fill"></i>
                                                 </a>
 
                                                 {{-- Aksi Edit --}}
                                                 <a href="{{ route('officers.edit', $officer->id) }}"
                                                     class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                    <i class="bi bi-pencil-fill"></i>
                                                 </a>
 
                                                 {{-- Aksi Hapus --}}
@@ -93,7 +93,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-sm btn-danger" type="submit">
-                                                        <i class="bi bi-trash"></i> Hapus
+                                                        <i class="bi bi-trash3-fill"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -110,7 +110,7 @@
                     </div>
                 @else
                     <div class="text-center text-muted py-4">
-                        <i class="bi bi-info-circle fs-4"></i>
+                        <i class="bi bi-exclamation-circle fs-4"></i>
                         <p class="mt-2 mb-0">Tidak ada data petugas yang ditemukan.</p>
                     </div>
                 @endif
