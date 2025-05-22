@@ -21,12 +21,11 @@ class VehicleSeeder extends Seeder
         }
 
         Vehicle::create([
-            'plate_number'     => strtoupper(fake()->bothify('N #### ??')),
+            'plate_number' => strtoupper(fake()->bothify('N #### ??')),
             'vehicle_model_id' => $vehicleModel->id,
-            'user_id'          => $user->id,
-            'parking_area_id'  => 1, 
-            'stnk_image'       => 'uploads/stnk/dummy-stnk.png',
-            'qr_code'          => Str::uuid(), 
+            'user_id' => $user->id,
+            'stnk_image' => 'uploads/stnk/dummy-stnk.png',
+            'qr_code' => Str::uuid(), 
         ]);
     }
 }

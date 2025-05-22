@@ -45,8 +45,6 @@ return new class extends Migration
             $table->string('plate_number')->unique();
             $table->foreignId('vehicle_model_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unsignedBigInteger('parking_area_id')->default(1);
-            $table->foreign('parking_area_id')->references('id')->on('parking_areas')->onDelete('cascade');
             $table->string('stnk_image')->nullable();
             $table->string('qr_code')->nullable();
             $table->timestamps();

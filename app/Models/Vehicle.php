@@ -13,24 +13,9 @@ class Vehicle extends Model
         'plate_number',
         'vehicle_model_id',
         'user_id',
-        'parking_area_id', // ← Tambahan
         'stnk_image',
         'qr_code',
     ];
-
-    /**
-     * Set default parking_area_id = 1 saat create jika belum diset.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($vehicle) {
-            if (is_null($vehicle->parking_area_id)) {
-                $vehicle->parking_area_id = 1;
-            }
-        });
-    }
 
     public function model()
     {
@@ -55,10 +40,5 @@ class Vehicle extends Model
     public function activeParkingRecord()
     {
         return $this->hasOne(ParkingRecord::class)->whereNull('exit_time')->where('status', 'parked');
-    }
-
-    public function parkingArea()
-    {
-        return $this->belongsTo(ParkingArea::class);
     }
 }

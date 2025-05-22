@@ -11,6 +11,7 @@ class ParkingRecord extends Model
 
     protected $fillable = [
         'vehicle_id',
+        'parking_area_id',
         'entry_time',
         'exit_time',
         'status',
@@ -19,5 +20,10 @@ class ParkingRecord extends Model
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    public function parkingArea()
+    {
+        return $this->belongsTo(ParkingArea::class);
     }
 }

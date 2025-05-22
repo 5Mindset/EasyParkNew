@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('parking_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('parking_area_id')->constrained()->onDelete('cascade');
             $table->timestamp('entry_time');
             $table->timestamp('exit_time')->nullable();
-            $table->enum('status', ['parked', 'exited'])->default('parked'); 
+            $table->enum('status', ['parked', 'exited'])->default('parked');
             $table->timestamps();
         });
     }

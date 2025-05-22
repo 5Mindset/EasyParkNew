@@ -11,14 +11,10 @@ use Illuminate\Validation\Rule;
 
 class ParkingRecordController extends Controller
 {
-    /**
-     * Menampilkan semua data rekaman parkir.
-     */
     public function index(Request $request)
     {
-        $query = ParkingRecord::with('vehicle.user');
+        $query = ParkingRecord::with(['vehicle.user', 'parkingArea']);
 
-        // Optional filtering
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -27,16 +23,18 @@ class ParkingRecordController extends Controller
             $query->where('vehicle_id', $request->vehicle_id);
         }
 
+        if ($request->has('parking_area_id')) {
+            $query->where('parking_area_id', $request->parking_area_id);
+        }
+
         return response()->json($query->get());
     }
 
-    /**
-     * Menyimpan data rekaman parkir baru.
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'parking_area_id' => ['required', 'exists:parking_areas,id'],
             'entry_time' => ['required', 'date'],
             'exit_time' => ['nullable', 'date', 'after_or_equal:entry_time'],
             'status' => ['required', Rule::in(['parked', 'exited'])],
@@ -46,7 +44,6 @@ class ParkingRecordController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // ✅ CEK apakah kendaraan sudah punya record yang belum keluar (exit_time null)
         $existingRecord = ParkingRecord::where('vehicle_id', $request->vehicle_id)
             ->whereNull('exit_time')
             ->where('status', 'parked')
@@ -55,20 +52,16 @@ class ParkingRecordController extends Controller
         if ($existingRecord) {
             return response()->json([
                 'message' => 'Kendaraan ini masih dalam status parkir dan belum keluar.'
-            ], 409); // 409 Conflict
+            ], 409);
         }
 
         $record = ParkingRecord::create($validator->validated());
-        return response()->json($record->load('vehicle.user'), 201);
+        return response()->json($record->load(['vehicle.user', 'parkingArea']), 201);
     }
 
-
-    /**
-     * Menampilkan detail rekaman parkir tertentu.
-     */
     public function show($id)
     {
-        $record = ParkingRecord::with('vehicle.user')->find($id);
+        $record = ParkingRecord::with(['vehicle.user', 'parkingArea'])->find($id);
 
         if (!$record) {
             return response()->json(['message' => 'Parking record not found'], 404);
@@ -77,9 +70,6 @@ class ParkingRecordController extends Controller
         return response()->json($record);
     }
 
-    /**
-     * Mengupdate data rekaman parkir.
-     */
     public function update(Request $request, $id)
     {
         $record = ParkingRecord::find($id);
@@ -90,6 +80,7 @@ class ParkingRecordController extends Controller
 
         $validator = Validator::make($request->all(), [
             'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'parking_area_id' => ['required', 'exists:parking_areas,id'],
             'entry_time' => ['required', 'date'],
             'exit_time' => ['nullable', 'date', 'after_or_equal:entry_time'],
             'status' => ['required', Rule::in(['parked', 'exited'])],
@@ -100,12 +91,9 @@ class ParkingRecordController extends Controller
         }
 
         $record->update($validator->validated());
-        return response()->json($record->load('vehicle.user'));
+        return response()->json($record->load(['vehicle.user', 'parkingArea']));
     }
 
-    /**
-     * Menghapus data rekaman parkir.
-     */
     public function destroy($id)
     {
         $record = ParkingRecord::find($id);
@@ -118,12 +106,9 @@ class ParkingRecordController extends Controller
         return response()->json(['message' => 'Parking record deleted'], 204);
     }
 
-    /**
-     * Mendapatkan semua kendaraan yang sedang parkir (belum keluar).
-     */
     public function active()
     {
-        $records = ParkingRecord::with(['vehicle.user'])
+        $records = ParkingRecord::with(['vehicle.user', 'parkingArea'])
             ->whereNull('exit_time')
             ->where('status', 'parked')
             ->get()
@@ -135,6 +120,7 @@ class ParkingRecordController extends Controller
                     'owner_name' => optional($record->vehicle->user)->name,
                     'entry_time' => $record->entry_time,
                     'status' => $record->status,
+                    'parking_area' => optional($record->parkingArea)->name,
                 ];
             });
 
@@ -157,15 +143,15 @@ class ParkingRecordController extends Controller
         $record->status = 'exited';
         $record->save();
 
-        return response()->json($record->load('vehicle.user'));
+        return response()->json($record->load(['vehicle.user', 'parkingArea']));
     }
-
 
     public function scan(Request $request)
     {
         $vehicleId = $request->input('vehicle_id');
-        $vehicle = Vehicle::find($vehicleId);
+        $parkingAreaId = $request->input('parking_area_id');
 
+        $vehicle = Vehicle::find($vehicleId);
         if (!$vehicle) {
             return response()->json(['message' => 'Kendaraan tidak ditemukan'], 404);
         }
@@ -176,26 +162,30 @@ class ParkingRecordController extends Controller
             ->first();
 
         if ($activeRecord) {
-            // Proses sebagai EXIT
             $activeRecord->exit_time = now();
             $activeRecord->status = 'exited';
             $activeRecord->save();
 
             return response()->json([
                 'message' => 'Kendaraan berhasil keluar parkir.',
-                'record' => $activeRecord->load('vehicle.user'),
+                'record' => $activeRecord->load(['vehicle.user', 'parkingArea']),
             ]);
         } else {
-            // Proses sebagai ENTRY
+            // Cek apakah area parkir diisi
+            if (!$parkingAreaId) {
+                return response()->json(['message' => 'Parking area is required for entry'], 422);
+            }
+
             $newRecord = ParkingRecord::create([
                 'vehicle_id' => $vehicleId,
+                'parking_area_id' => $parkingAreaId,
                 'entry_time' => now(),
                 'status' => 'parked',
             ]);
 
             return response()->json([
                 'message' => 'Kendaraan berhasil masuk parkir.',
-                'record' => $newRecord->load('vehicle.user'),
+                'record' => $newRecord->load(['vehicle.user', 'parkingArea']),
             ]);
         }
     }
