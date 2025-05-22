@@ -36,4 +36,9 @@ class Vehicle extends Model
     {
         return $this->model?->vehicleBrand?->vehicleType;
     }
+
+    public function activeParkingRecord()
+    {
+        return $this->hasOne(ParkingRecord::class)->whereNull('exit_time')->where('status', 'parked');
+    }
 }

@@ -18,7 +18,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/send-otp', [OtpController::class, 'sendOtp']);
 Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
 Route::post('/reset-password', [OtpController::class, 'resetPassword']);
-Route::get('/vehicles/{id}', [VehicleController::class, 'show']); // public access
+Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
+
+// Public POST parking-records (no auth)
+Route::post('/parking-records', [ParkingRecordController::class, 'store']);
+Route::post('/parking-records/{id}/exit', [ParkingRecordController::class, 'exit']);
+Route::post('/parking-records/scan', [ParkingRecordController::class, 'scan']);
+
 
 // Routes for authenticated users
 Route::middleware('auth:sanctum')->group(function () {
@@ -29,17 +35,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout-all', [AuthController::class, 'logoutAll']);
 });
 
-// Routes for Admin only
-// Routes for Admin & Petugas
-Route::middleware(['auth:sanctum', 'roleApi:admin,petugas'])->group(function () {
+// Routes for Admin & Petugas (except store for parking-records)
+Route::middleware(['auth:sanctum', 'roleApi:petugas,mahasiswa'])->group(function () {
     Route::apiResource('vehicle-types', VehicleTypeController::class);
     Route::apiResource('vehicle-brands', VehicleBrandController::class);
     Route::apiResource('vehicle-models', VehicleModelController::class);
     Route::apiResource('vehicles', VehicleController::class);
     Route::apiResource('guest-vehicles', GuestVehicleController::class);
-    Route::apiResource('parking-records', ParkingRecordController::class);
 
-    // Tambahan baru
+    // parking-records without store (store is public)
+    Route::apiResource('parking-records', ParkingRecordController::class)->except(['store']);
+
     Route::get('parking-records/active', [ParkingRecordController::class, 'active']);
 
     Route::put('guest-vehicles/{id}/exit', [GuestVehicleController::class, 'exitVehicle']);
@@ -48,7 +54,8 @@ Route::middleware(['auth:sanctum', 'roleApi:admin,petugas'])->group(function () 
         return response()->json(['user' => $request->user()]);
     });
 });
-// Routes for Mahasiswa only
+
+// Routes for Mahasiswa only (except store for parking-records)
 Route::middleware(['auth:sanctum', 'roleApi:mahasiswa,petugas'])->group(function () {
     Route::apiResource('my-vehicles', VehicleStudentController::class);
     Route::get('/vehicle-types', [VehicleTypeController::class, 'index']);
@@ -57,5 +64,8 @@ Route::middleware(['auth:sanctum', 'roleApi:mahasiswa,petugas'])->group(function
     Route::get('/vehicle-brands/by-type/{typeId}', [VehicleBrandController::class, 'getByType']);
     Route::get('/vehicle-models/by-brand/{brandId}', [VehicleModelController::class, 'getByBrand']);
     Route::post('/vehicle-models', [VehicleModelController::class, 'store']);
-    Route::post('/my-vehicles/{id}', [VehicleStudentController::class, 'update']); // Tambahkan ini
+    Route::post('/my-vehicles/{id}', [VehicleStudentController::class, 'update']);
+
+    // parking-records index and show only (store is public)
+    Route::apiResource('parking-records', ParkingRecordController::class)->only(['index', 'show']);
 });
