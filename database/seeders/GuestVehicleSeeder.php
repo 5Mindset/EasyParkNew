@@ -2,32 +2,28 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\GuestVehicle;
+use App\Models\VehicleType;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
 class GuestVehicleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        GuestVehicle::create([
-            'name' => 'Budi Santoso',
-            'plate_number' => 'N 1234 AB',
-            'vehicle_type_id' => 1, 
-            'entry_time' => Carbon::now()->subHours(2),
-            'exit_time' => null,
-            'status' => 'parked',
-        ]);
+        $vehicleType = VehicleType::inRandomOrder()->first();
+
+        if (!$vehicleType) {
+            $this->command->warn('Belum ada data vehicle_types. Seeder GuestVehicle tidak dijalankan.');
+            return;
+        }
 
         GuestVehicle::create([
-            'name' => 'Siti Aminah',
-            'plate_number' => 'N 5678 CD',
-            'vehicle_type_id' => 2,
-            'entry_time' => Carbon::now()->subHours(3),
-            'exit_time' => Carbon::now()->subHour(),
+            'name' => fake()->name(),
+            'plate_number' => strtoupper(fake()->bothify('N #### ??')),
+            'vehicle_type_id' => $vehicleType->id,
+            'entry_time' => Carbon::now()->subHours(rand(1, 6)),
+            'exit_time' => null,
             'status' => 'parked',
         ]);
     }

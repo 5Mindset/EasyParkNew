@@ -5,34 +5,26 @@ namespace Database\Seeders;
 use App\Models\ParkingRecord;
 use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class ParkingRecordSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan sudah ada kendaraan
-        if (Vehicle::count() === 0) {
-            $this->command->warn('Vehicle belum ada. Jalankan seeder untuk kendaraan dulu.');
+        $vehicle = Vehicle::inRandomOrder()->first();
+
+        if (!$vehicle) {
+            $this->command->warn('Belum ada data kendaraan. Seeder ParkingRecord tidak dijalankan.');
             return;
         }
 
-        // Dapatkan ID kendaraan pertama yang sudah ada
-        $vehicleIds = Vehicle::pluck('id')->toArray();
+        $entry = Carbon::now()->subHours(rand(1, 6));
 
-        // Pastikan ada kendaraan dengan ID 1
-        if (empty($vehicleIds)) {
-            $this->command->warn('Tidak ada kendaraan di database.');
-            return;
-        }
-
-        // Data parkir contoh
-        $parkingRecords = [
-            ['vehicle_id' => $vehicleIds[0], 'entry_time' => now()->subHours(2), 'exit_time' => now()->subMinutes(30), 'status' => 'exited'],
-            ['vehicle_id' => $vehicleIds[0], 'entry_time' => now()->subDay(), 'exit_time' => now(), 'status' => 'parked'],
-        ];
-
-        foreach ($parkingRecords as $record) {
-            ParkingRecord::firstOrCreate($record);
-        }
+        ParkingRecord::create([
+            'vehicle_id' => $vehicle->id,
+            'entry_time' => $entry,
+            'exit_time' => rand(0, 1) ? $entry->copy()->addHours(rand(1, 3)) : null,
+            'status' => rand(0, 1) ? 'parked' : 'exited',
+        ]);
     }
 }
