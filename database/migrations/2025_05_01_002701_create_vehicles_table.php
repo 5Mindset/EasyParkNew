@@ -33,11 +33,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('parking_areas', function (Blueprint $table) {
+            $table->id();
+            $table->string('name'); 
+            $table->decimal('max_area', 8, 2); 
+            $table->timestamps();
+        });
+
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->string('plate_number')->unique();
             $table->foreignId('vehicle_model_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('parking_area_id')->default(1);
+            $table->foreign('parking_area_id')->references('id')->on('parking_areas')->onDelete('cascade');
             $table->string('stnk_image')->nullable();
             $table->string('qr_code')->nullable();
             $table->timestamps();
@@ -53,5 +62,6 @@ return new class extends Migration
         Schema::dropIfExists('vehicle_models');
         Schema::dropIfExists('vehicle_brands');
         Schema::dropIfExists('vehicle_types');
+        Schema::dropIfExists('parking_areas');
     }
 };
