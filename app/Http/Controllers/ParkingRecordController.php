@@ -7,6 +7,7 @@ use App\Models\VehicleType;
 use App\Models\Vehicle;
 use App\Models\ParkingArea;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ParkingRecordController extends Controller
 {
@@ -30,11 +31,11 @@ class ParkingRecordController extends Controller
         $parkingAreaId = $request->parking_area_id;
 
         $parkingRecords = ParkingRecord::with([
-                'vehicle.model.vehicleBrand',
-                'vehicle.model.vehicleType',
-                'vehicle.user',
-                'parkingArea' // ✅ relasi area parkir
-            ])
+            'vehicle.model.vehicleBrand',
+            'vehicle.model.vehicleType',
+            'vehicle.user',
+            'parkingArea' // ✅ relasi area parkir
+        ])
             ->when($fromDate, fn($query) => $query->whereDate('entry_time', '>=', $fromDate))
             ->when($toDate, fn($query) => $query->whereDate('entry_time', '<=', $toDate))
             ->when($status, fn($query) => $query->where('status', $status))
@@ -61,6 +62,48 @@ class ParkingRecordController extends Controller
             'vehicleTypes',
             'parkingAreas' // ✅ lempar ke view
         ));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date'],
+            'status' => ['nullable', 'in:parked,left'],
+            'vehicle_id' => ['nullable', 'exists:vehicles,id'],
+            'vehicle_type_id' => ['nullable', 'exists:vehicle_types,id'],
+            'parking_area_id' => ['nullable', 'exists:parking_areas,id'],
+        ]);
+
+        $fromDate = $request->from_date;
+        $toDate = $request->to_date;
+        $status = $request->status;
+        $vehicleId = $request->vehicle_id;
+        $vehicleTypeId = $request->vehicle_type_id;
+        $parkingAreaId = $request->parking_area_id;
+
+        $parkingRecords = ParkingRecord::with([
+            'vehicle.model.vehicleBrand',
+            'vehicle.model.vehicleType',
+            'vehicle.user',
+            'parkingArea'
+        ])
+            ->when($fromDate, fn($query) => $query->whereDate('entry_time', '>=', $fromDate))
+            ->when($toDate, fn($query) => $query->whereDate('entry_time', '<=', $toDate))
+            ->when($status, fn($query) => $query->where('status', $status))
+            ->when($vehicleId, fn($query) => $query->where('vehicle_id', $vehicleId))
+            ->when($vehicleTypeId, function ($query) use ($vehicleTypeId) {
+                $query->whereHas('vehicle.model.vehicleBrand.vehicleType', function ($q) use ($vehicleTypeId) {
+                    $q->where('id', $vehicleTypeId);
+                });
+            })
+            ->when($parkingAreaId, fn($query) => $query->where('parking_area_id', $parkingAreaId))
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('admin.parking_records.pdf', compact('parkingRecords'));
+        return $pdf->stream('riwayat-parkir.pdf');
     }
 
     public function show(ParkingRecord $parkingRecord)

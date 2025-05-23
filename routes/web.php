@@ -11,6 +11,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\GuestVehicleController;
 use App\Http\Controllers\ParkingRecordController;
 use App\Http\Controllers\ParkingAreaController;
+use App\Http\Controllers\Auth\LogoutController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -34,12 +35,16 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     Route::resource('guest-vehicles', GuestVehicleController::class);
     Route::resource('parking-records', ParkingRecordController::class);
     Route::resource('parking-areas', ParkingAreaController::class);
+
+    Route::get('/parking-records/export/pdf', [ParkingRecordController::class, 'exportPdf'])->name('parking-records.exportPdf');
 });
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController1::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController1::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController1::class, 'update'])->name('profile.update');
+
+    Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
     // 👇 Tambahkan ini untuk edit dan update password
     Route::get('/profile/password', [ProfileController1::class, 'editPassword'])->name('profile.password.edit');

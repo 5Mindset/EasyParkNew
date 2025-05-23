@@ -18,6 +18,16 @@
     {{-- Form Edit --}}
     <div class="card border-0 shadow rounded-4 mt-3">
         <div class="card-body p-4">
+
+            @if ($is_locked)
+                <div class="alert alert-warning d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                    <div>
+                        Area ini tidak dapat diedit karena ada kendaraan yang sedang parkir (status <strong>parked</strong>).
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ route('parking-areas.update', $parkingArea->id) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -32,7 +42,7 @@
                         class="form-control @error('name') is-invalid @enderror" 
                         value="{{ old('name', $parkingArea->name) }}"
                         placeholder="Contoh: Area Utama, Area Selatan"
-                        required
+                        @if ($is_locked) disabled @endif
                     >
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -51,7 +61,7 @@
                         class="form-control @error('max_area') is-invalid @enderror" 
                         value="{{ old('max_area', $parkingArea->max_area) }}"
                         placeholder="Contoh: 896.00"
-                        required
+                        @if ($is_locked) disabled @endif
                     >
                     @error('max_area')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -60,7 +70,7 @@
 
                 {{-- Tombol Update --}}
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" @if ($is_locked) disabled @endif>
                         <i class="bi bi-save"></i> Update
                     </button>
                 </div>

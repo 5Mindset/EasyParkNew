@@ -7,5 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ParkingArea extends Model
 {
     protected $fillable = ['name', 'max_area'];
-}
 
+    public function parkingRecords()
+    {
+        return $this->hasMany(ParkingRecord::class);
+    }
+}

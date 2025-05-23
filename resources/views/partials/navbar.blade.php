@@ -12,8 +12,12 @@
         <ul class="d-flex align-items-center">
             <li class="nav-item dropdown pe-3">
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="{{ Auth::user()->image ? asset('storage/' . Auth::user()->image) : asset('assets/img/default.jpg') }}"
-                        alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                    @if(Auth::user()->image)
+                        <img src="{{ asset('storage/' . Auth::user()->image) }}"
+                            alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                    @else
+                        <i class="bi bi-person-circle text-secondary" style="font-size: 1.8rem; width: 40px; height: 40px;"></i>
+                    @endif
                     <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
                 </a><!-- End Profile Image Icon -->
 

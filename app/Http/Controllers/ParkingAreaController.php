@@ -43,7 +43,19 @@ class ParkingAreaController extends Controller
 
     public function edit(ParkingArea $parkingArea)
     {
-        return view('admin.parking_areas.edit', compact('parkingArea'));
+        $hasParkedVehicles = $parkingArea->parkingRecords()
+            ->where('status', 'parked')
+            ->exists();
+
+        if ($hasParkedVehicles) {
+            return redirect()->route('parking-areas.index')
+                ->with('error', 'Area parkir tidak bisa diedit karena ada kendaraan yang sedang parkir.');
+        }
+
+        return view('admin.parking_areas.edit', [
+            'parkingArea' => $parkingArea,
+            'is_locked' => $hasParkedVehicles, // false kalau sudah sampai sini
+        ]);
     }
 
     public function update(Request $request, ParkingArea $parkingArea)

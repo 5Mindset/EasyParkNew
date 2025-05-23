@@ -5,14 +5,8 @@
         {{-- Judul --}}
         <h4 class="fw-bold mb-3">Daftar Area Parkir</h4>
 
-        {{-- Baris: Tambah dan Search --}}
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            {{-- Tombol Tambah --}}
-            <a href="{{ route('parking-areas.create') }}" class="btn btn-primary d-flex align-items-center gap-2">
-                <i class="bi bi-plus-circle"></i>
-                <span>Tambah Area</span>
-            </a>
-
+        {{-- Baris: Search --}}
+        <div class="d-flex justify-content-end align-items-center mb-4 flex-wrap gap-3">
             {{-- Form Search --}}
             <form action="{{ route('parking-areas.index') }}" method="GET" class="position-relative"
                 style="max-width: 250px; width: 100%;">
@@ -30,10 +24,27 @@
             </div>
         @endif
 
+        {{-- Alert error --}}
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Gagal!</strong> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+            </div>
+        @endif
+
         {{-- Tabel --}}
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body p-4">
                 @if ($parkingAreas->count())
+                    @php
+                        // Cek apakah ada area terkunci
+                        $hasLockedArea = $parkingAreas
+                            ->filter(function ($area) {
+                                return $area->parkingRecords()->where('status', 'parked')->exists();
+                            })
+                            ->isNotEmpty();
+                    @endphp
+
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
@@ -51,27 +62,42 @@
                                         <td class="fw-semibold">{{ $area->name }}</td>
                                         <td>{{ $area->max_area }}</td>
                                         <td>
-                                            <div class="d-flex gap-2">
+                                            @php
+                                                $isLocked = $area
+                                                    ->parkingRecords()
+                                                    ->where('status', 'parked')
+                                                    ->exists();
+                                            @endphp
+
+                                            @if ($isLocked)
+                                                <button class="btn btn-sm btn-secondary" disabled
+                                                    title="Tidak bisa diedit karena ada kendaraan sedang parkir">
+                                                    <i class="bi bi-lock-fill"></i> Terkunci
+                                                </button>
+                                            @else
                                                 <a href="{{ route('parking-areas.edit', $area->id) }}"
                                                     class="btn btn-sm btn-warning">
                                                     <i class="bi bi-pencil-square"></i> Edit
                                                 </a>
-                                                <form action="{{ route('parking-areas.destroy', $area->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus area ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger" type="submit">
-                                                        <i class="bi bi-trash"></i> Hapus
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Catatan hanya muncul jika ada area terkunci --}}
+                    @if ($hasLockedArea)
+                        <div class="alert alert-info mt-4 mb-0 rounded-4 d-flex align-items-start gap-2" role="alert">
+                            <i class="bi bi-exclamation-circle-fill fs-5 mt-1"></i>
+                            <div>
+                                <strong>Catatan:</strong> Area parkir yang sedang digunakan tidak dapat diedit. Silakan
+                                tunggu
+                                hingga semua kendaraan keluar untuk dapat mengedit data area tersebut.
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Pagination Tailwind --}}
                     <div class="mt-3">

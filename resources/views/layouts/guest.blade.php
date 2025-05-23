@@ -1,30 +1,46 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="en">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Easy Park Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+    <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+</head>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+<body class="min-h-screen flex">
+    <!-- Left section -->
+    <div class="w-[55%] min-h-screen relative flex flex-col justify-center items-start px-16 py-20 overflow-hidden text-white"
+        style="background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') no-repeat center center/cover;">
+        
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+        
+        <!-- Content -->
+        <img src="images/logo.png" alt="Easy Park logo" class="w-36 mb-8 z-10 relative" />
+        <h1 class="text-4xl font-extrabold mb-4 drop-shadow-lg max-w-md z-10 relative">
+            Selamat Datang di Easy Park!
+        </h1>
+        <p class="text-lg mb-8 max-w-md leading-relaxed drop-shadow-md z-10 relative">
+            Nikmati layanan parkir kami yang luas, aman, dan strategis. Parkir jadi lebih mudah dan nyaman dengan Easy Park.
+        </p>
+        <button
+            class="bg-[#0086FF] text-white font-semibold rounded-full py-3 px-10 shadow-lg hover:bg-[#0065d1] transition-colors drop-shadow-md z-10 relative">
+            Pelajari Lebih Lanjut
+        </button>
+    </div>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <!-- Right section (slot for login) -->
+    <div class="w-[45%] min-h-screen flex flex-col justify-center items-center px-16 bg-white">
+        {{ $slot }}
+    </div>
+</body>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
-        </div>
-    </body>
 </html>

@@ -27,6 +27,11 @@
                 </select>
                 <input type="hidden" name="status" value="{{ request('status') }}">
             </form>
+
+            {{-- Tombol Cetak PDF --}}
+            <a href="{{ route('parking-records.exportPdf', request()->query()) }}" target="_blank" class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Cetak PDF
+            </a>
         </div>
 
         {{-- Alert --}}
@@ -67,7 +72,8 @@
                                         <td>{{ $record->vehicle->model->vehicleType->name ?? '-' }}</td>
                                         <td>{{ $record->vehicle->user->name ?? '-' }}</td>
                                         <td>
-                                            <span class="badge bg-{{ $record->status === 'parked' ? 'success' : 'secondary' }}">
+                                            <span
+                                                class="badge bg-{{ $record->status === 'parked' ? 'success' : 'secondary' }}">
                                                 {{ $record->status === 'parked' ? 'Parkir' : 'Keluar' }}
                                             </span>
                                         </td>
