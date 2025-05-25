@@ -294,103 +294,102 @@ class ParkingRecordController extends Controller
         }
     }
     public function history(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    if (!$user) {
-        return response()->json(['message' => 'User not authenticated'], 401);
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $records = ParkingRecord::with([
+            'vehicle.model.vehicleBrand.vehicleType',  // Eager loading sampai vehicleType
+            'vehicle.user'
+        ])
+            ->whereHas('vehicle', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->orderByDesc('entry_time')
+            ->get();
+
+        if ($records->isEmpty()) {
+            return response()->json(['message' => 'Parking record not found'], 404);
+        }
+
+        $result = $records->map(function ($record) {
+            return [
+                'plate_number' => optional($record->vehicle)->plate_number,
+                'owner_name' => optional($record->vehicle->user)->name,
+                'vehicle_type_name' => optional($record->vehicle->model->vehicleBrand->vehicleType)->name,
+                'entry_time' => $record->entry_time,
+                'exit_time' => $record->exit_time,
+                'status' => $record->exit_time === null ? 'Masuk' : 'Keluar',
+            ];
+        });
+
+        return response()->json($result);
     }
 
-    $records = ParkingRecord::with([
-        'vehicle.model.vehicleBrand.vehicleType',  // Eager loading sampai vehicleType
-        'vehicle.user'
-    ])
-    ->whereHas('vehicle', function ($query) use ($user) {
-        $query->where('user_id', $user->id);
-    })
-    ->orderByDesc('entry_time')
-    ->get();
+    public function lastStatus(Request $request)
+    {
+        $user = $request->user();
 
-    if ($records->isEmpty()) {
-        return response()->json(['message' => 'Parking record not found'], 404);
-    }
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
 
-    $result = $records->map(function ($record) {
-        return [
-            'plate_number' => optional($record->vehicle)->plate_number,
-            'owner_name' => optional($record->vehicle->user)->name,
-            'vehicle_type_name' => optional($record->vehicle->model->vehicleBrand->vehicleType)->name,
-            'entry_time' => $record->entry_time,
-            'exit_time' => $record->exit_time,
-            'status' => $record->exit_time === null ? 'Masuk' : 'Keluar',
-        ];
-    });
-
-    return response()->json($result);
-}
-
-public function lastStatus(Request $request)
-{
-    $user = $request->user();
-
-    if (!$user) {
-        return response()->json(['message' => 'User not authenticated'], 401);
-    }
-
-    $lastRecord = ParkingRecord::whereHas('vehicle', function ($query) use ($user) {
+        $lastRecord = ParkingRecord::whereHas('vehicle', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-        ->orderByDesc('entry_time')
-        ->first();
+            ->orderByDesc('entry_time')
+            ->first();
 
-    if (!$lastRecord) {
-        return response()->json(['message' => 'Tidak ada data parkir ditemukan'], 404);
+        if (!$lastRecord) {
+            return response()->json(['message' => 'Tidak ada data parkir ditemukan'], 404);
+        }
+
+        return response()->json([
+            'status' => $lastRecord->exit_time === null ? 'parked' : 'exited',
+        ]);
     }
+    public function lastEntryExit(Request $request)
+    {
+        $user = $request->user();
 
-    return response()->json([
-        'status' => $lastRecord->exit_time === null ? 'parked' : 'exited',
-    ]);
-}
-public function lastEntryExit(Request $request)
-{
-    $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
 
-    if (!$user) {
-        return response()->json(['message' => 'User not authenticated'], 401);
+        // Terakhir kali masuk (record terbaru berdasarkan entry_time)
+        $lastEntry = ParkingRecord::with('vehicle.user')
+            ->whereHas('vehicle', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->orderByDesc('entry_time')
+            ->first();
+
+        // Terakhir kali keluar (record dengan exit_time, diurutkan berdasarkan exit_time)
+        $lastExit = ParkingRecord::with('vehicle.user')
+            ->whereHas('vehicle', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereNotNull('exit_time')
+            ->orderByDesc('exit_time')
+            ->first();
+
+        return response()->json([
+            'last_entry' => $lastEntry ? [
+                'plate_number' => optional($lastEntry->vehicle)->plate_number,
+                'owner_name' => optional($lastEntry->vehicle->user)->name,
+                'entry_time' => $lastEntry->entry_time,
+                'status' => 'Masuk',
+            ] : null,
+
+            'last_exit' => $lastExit ? [
+                'plate_number' => optional($lastExit->vehicle)->plate_number,
+                'owner_name' => optional($lastExit->vehicle->user)->name,
+                'exit_time' => $lastExit->exit_time,
+                'status' => 'Keluar',
+            ] : null,
+        ]);
     }
-
-    // Terakhir kali masuk (record terbaru berdasarkan entry_time)
-    $lastEntry = ParkingRecord::with('vehicle.user')
-        ->whereHas('vehicle', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-        ->orderByDesc('entry_time')
-        ->first();
-
-    // Terakhir kali keluar (record dengan exit_time, diurutkan berdasarkan exit_time)
-    $lastExit = ParkingRecord::with('vehicle.user')
-        ->whereHas('vehicle', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-        ->whereNotNull('exit_time')
-        ->orderByDesc('exit_time')
-        ->first();
-
-    return response()->json([
-        'last_entry' => $lastEntry ? [
-            'plate_number' => optional($lastEntry->vehicle)->plate_number,
-            'owner_name' => optional($lastEntry->vehicle->user)->name,
-            'entry_time' => $lastEntry->entry_time,
-            'status' => 'Masuk',
-        ] : null,
-
-        'last_exit' => $lastExit ? [
-            'plate_number' => optional($lastExit->vehicle)->plate_number,
-            'owner_name' => optional($lastExit->vehicle->user)->name,
-            'exit_time' => $lastExit->exit_time,
-            'status' => 'Keluar',
-        ] : null,
-    ]);
-}
-
 }

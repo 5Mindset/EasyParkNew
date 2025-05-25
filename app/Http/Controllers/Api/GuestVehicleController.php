@@ -28,7 +28,7 @@ class GuestVehicleController extends Controller
 
         $guestVehicle = GuestVehicle::create([
             'plate_number' => $request->plate_number,
-            'name' => $request->owner_name,
+            'name' => $request->name, // ✅ diperbaiki
             'vehicle_type_id' => $request->vehicle_type_id,
             'entry_time' => $request->entry_time ?? now(),
             'exit_time' => $request->exit_time,
@@ -50,7 +50,7 @@ class GuestVehicleController extends Controller
 
         $request->validate([
             'plate_number' => 'required|string|max:20|unique:guest_vehicles,plate_number,' . $guestVehicle->id,
-            'owner_name' => 'required|string|max:100',
+            'name' => 'required|string|max:100', // ✅ ganti owner_name jadi name
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'entry_time' => 'nullable|date',
             'exit_time' => 'nullable|date|after_or_equal:entry_time',
@@ -59,7 +59,7 @@ class GuestVehicleController extends Controller
 
         $guestVehicle->update([
             'plate_number' => $request->plate_number,
-            'name' => $request->owner_name,
+            'name' => $request->name, // ✅ diperbaiki
             'vehicle_type_id' => $request->vehicle_type_id,
             'entry_time' => $request->entry_time,
             'exit_time' => $request->exit_time,
