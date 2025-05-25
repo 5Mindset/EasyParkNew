@@ -42,6 +42,9 @@ Route::middleware(['auth:sanctum', 'roleApi:petugas,mahasiswa'])->group(function
     Route::apiResource('vehicle-models', VehicleModelController::class);
     Route::apiResource('vehicles', VehicleController::class);
     Route::apiResource('guest-vehicles', GuestVehicleController::class);
+        Route::get('/parking-records/history', [ParkingRecordController::class, 'history']);
+     Route::get('/parking-records/last-status', [ParkingRecordController::class, 'lastStatus']);
+    Route::get('/parking-records/last-entry-exit', [ParkingRecordController::class, 'lastEntryExit']);
         // Pindahkan 'active' sebelum apiResource parking-records
     Route::get('parking-records/active', [ParkingRecordController::class, 'active']);
     Route::apiResource('parking-records', ParkingRecordController::class);
