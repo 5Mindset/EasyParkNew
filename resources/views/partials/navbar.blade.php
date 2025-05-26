@@ -11,7 +11,7 @@
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
             <li class="nav-item dropdown pe-3">
-                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="profile.index" data-bs-toggle="dropdown">
+                <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                     @if(Auth::user()->image)
                         <img src="{{ asset('storage/' . Auth::user()->image) }}"
                             alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
@@ -27,9 +27,7 @@
                         <span>{{ Auth::user()->role->name ?? 'User' }}</span>
                     </li>
 
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    <li><hr class="dropdown-divider"></li>
 
                     <li>
                         <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.index') }}">
@@ -38,9 +36,7 @@
                         </a>
                     </li>
 
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    <li><hr class="dropdown-divider"></li>
 
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
@@ -57,3 +53,55 @@
     </nav><!-- End Icons Navigation -->
 
 </header><!-- End Header -->
+
+<!-- ======= Head Meta & CSS ======= -->
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+<title>@yield('title', 'EasyPark')</title>
+<meta content="" name="description">
+<meta content="" name="keywords">
+
+<!-- Favicons -->
+<link href="{{ asset('assets/img/logo.png') }}" rel="icon">
+<link href="{{ asset('assets/img/logo.png') }}" rel="apple-touch-icon">
+
+<!-- CSRF Token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<!-- Google Fonts -->
+<link href="https://fonts.gstatic.com" rel="preconnect">
+<link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
+
+<!-- Vendor CSS Files -->
+<link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/quill/quill.snow.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<!-- Template Main CSS File -->
+<link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Bootstrap Bundle JS (wajib untuk dropdown) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Inisialisasi Dropdown (Jika diperlukan tambahan debug) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+        dropdownTriggerList.map(function (dropdownTriggerEl) {
+            new bootstrap.Dropdown(dropdownTriggerEl)
+        })
+    });
+</script>
