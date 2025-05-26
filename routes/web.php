@@ -37,6 +37,7 @@ Route::middleware(['auth', 'roleWeb:admin'])->group(function () {
     Route::resource('parking-areas', ParkingAreaController::class);
 
     Route::get('/parking-records/export/pdf', [ParkingRecordController::class, 'exportPdf'])->name('parking-records.exportPdf');
+    Route::get('/guest-vehicles/export/pdf', [GuestVehicleController::class, 'exportPdf'])->name('guest-vehicles.exportPdf');
 });
 
 Route::middleware(['auth'])->group(function () {

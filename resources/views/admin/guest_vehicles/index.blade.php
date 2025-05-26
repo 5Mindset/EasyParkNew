@@ -12,8 +12,6 @@
                     <option value="parked" {{ request('status') == 'parked' ? 'selected' : '' }}>Parkir</option>
                     <option value="exited" {{ request('status') == 'exited' ? 'selected' : '' }}>Keluar</option>
                 </select>
-
-                {{-- Simpan filter jenis kendaraan saat ganti status --}}
                 <input type="hidden" name="vehicle_type_id" value="{{ request('vehicle_type_id') }}">
                 <input type="hidden" name="search" value="{{ request('search') }}">
             </form>
@@ -28,11 +26,14 @@
                         </option>
                     @endforeach
                 </select>
-
-                {{-- Simpan filter status saat ganti jenis kendaraan --}}
                 <input type="hidden" name="status" value="{{ request('status') }}">
                 <input type="hidden" name="search" value="{{ request('search') }}">
             </form>
+
+            {{-- Tombol Cetak PDF --}}
+            <a href="{{ route('guest-vehicles.exportPdf', request()->query()) }}" target="_blank" class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Cetak PDF
+            </a>
         </div>
 
         {{-- Alert --}}
@@ -69,8 +70,7 @@
                                         <td>{{ $vehicle->name }}</td>
                                         <td>{{ $vehicle->vehicleType->name ?? '-' }}</td>
                                         <td>
-                                            <span
-                                                class="badge bg-{{ $vehicle->status === 'parked' ? 'success' : 'secondary' }}">
+                                            <span class="badge bg-{{ $vehicle->status === 'parked' ? 'success' : 'secondary' }}">
                                                 {{ ucfirst($vehicle->status) }}
                                             </span>
                                         </td>
