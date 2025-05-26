@@ -15,16 +15,6 @@
 
         <div class="card border-0 shadow rounded-4 mt-3">
             <div class="card-body p-4">
-                {{-- Tampilkan pesan error validasi --}}
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 {{-- Form Edit Kendaraan --}}
                 <form action="{{ route('vehicles.update', $vehicle->id) }}" method="POST" enctype="multipart/form-data">

@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class OfficerController extends Controller
 {
@@ -17,8 +19,8 @@ class OfficerController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('full_name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone_number', 'like', '%' . $search . '%');
+                      ->orWhere('email', 'like', '%' . $search . '%')
+                      ->orWhere('phone_number', 'like', '%' . $search . '%');
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -45,25 +47,34 @@ class OfficerController extends Controller
             'image'         => 'nullable|image|max:2048',
         ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('uploads/petugas', 'public');
+        try {
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('uploads/petugas', 'public');
+            }
+
+            User::create([
+                'nim'           => $request->nip,
+                'name'          => explode(' ', $request->full_name)[0],
+                'full_name'     => $request->full_name,
+                'email'         => $request->email,
+                'phone_number'  => $request->phone_number,
+                'date_of_birth' => $request->date_of_birth,
+                'address'       => $request->address,
+                'password'      => Hash::make($request->password),
+                'role'          => 'petugas',
+                'image'         => $imagePath,
+            ]);
+
+            return redirect()->route('officers.index')
+                ->with('success', 'Petugas berhasil ditambahkan.');
+        } catch (QueryException $e) {
+            Log::error('Officer store failed: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan petugas. Periksa input Anda.');
         }
-
-        User::create([
-            'nim'           => $request->nip,
-            'name'          => explode(' ', $request->full_name)[0],
-            'full_name'     => $request->full_name,
-            'email'         => $request->email,
-            'phone_number'  => $request->phone_number,
-            'date_of_birth' => $request->date_of_birth,
-            'address'       => $request->address,
-            'password'      => Hash::make($request->password),
-            'role'          => 'petugas',
-            'image'         => $imagePath,
-        ]);
-
-        return redirect()->route('officers.index')->with('success', 'Petugas berhasil ditambahkan.');
     }
 
     public function edit(User $officer)
@@ -101,32 +112,41 @@ class OfficerController extends Controller
             'image'         => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only([
-            'full_name',
-            'email',
-            'phone_number',
-            'date_of_birth',
-            'address',
-        ]);
+        try {
+            $data = $request->only([
+                'full_name',
+                'email',
+                'phone_number',
+                'date_of_birth',
+                'address',
+            ]);
 
-        $data['nim'] = $request->nip;
-        $data['name'] = explode(' ', $request->full_name)[0];
+            $data['nim'] = $request->nip;
+            $data['name'] = explode(' ', $request->full_name)[0];
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        if ($request->hasFile('image')) {
-            if ($officer->image) {
-                Storage::disk('public')->delete($officer->image);
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
             }
 
-            $data['image'] = $request->file('image')->store('uploads/petugas', 'public');
+            if ($request->hasFile('image')) {
+                if ($officer->image) {
+                    Storage::disk('public')->delete($officer->image);
+                }
+
+                $data['image'] = $request->file('image')->store('uploads/petugas', 'public');
+            }
+
+            $officer->update($data);
+
+            return redirect()->route('officers.index')
+                ->with('success', 'Data petugas berhasil diperbarui.');
+        } catch (QueryException $e) {
+            Log::error('Officer update failed: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui data petugas. Periksa input Anda.');
         }
-
-        $officer->update($data);
-
-        return redirect()->route('officers.index')->with('success', 'Data petugas berhasil diperbarui.');
     }
 
     public function destroy(User $officer)
@@ -135,12 +155,20 @@ class OfficerController extends Controller
             abort(404);
         }
 
-        if ($officer->image) {
-            Storage::disk('public')->delete($officer->image);
+        try {
+            if ($officer->image) {
+                Storage::disk('public')->delete($officer->image);
+            }
+
+            $officer->delete();
+
+            return redirect()->route('officers.index')
+                ->with('success', 'Petugas berhasil dihapus.');
+        } catch (QueryException $e) {
+            Log::error('Officer delete failed: ' . $e->getMessage());
+
+            return back()
+                ->with('error', 'Gagal menghapus petugas. Data mungkin sedang digunakan.');
         }
-
-        $officer->delete();
-
-        return redirect()->route('officers.index')->with('success', 'Petugas berhasil dihapus.');
     }
 }

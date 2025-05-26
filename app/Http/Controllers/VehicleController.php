@@ -40,7 +40,6 @@ class VehicleController extends Controller
             ? VehicleModel::where('vehicle_brand_id', $request->vehicle_brand_id)->get()
             : collect();
 
-        // Ambil hanya user dengan role mahasiswa
         $users = User::where('role', 'mahasiswa')->get();
 
         return view('admin.vehicles.create', compact('types', 'brands', 'models', 'users'));
@@ -55,10 +54,11 @@ class VehicleController extends Controller
             'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Validasi tambahan: hanya mahasiswa
         $user = User::findOrFail($request->user_id);
         if ($user->role !== 'mahasiswa') {
-            return back()->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])->withInput();
+            return back()
+                ->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])
+                ->withInput();
         }
 
         $data = $request->only(['plate_number', 'vehicle_model_id', 'user_id']);
@@ -77,7 +77,9 @@ class VehicleController extends Controller
         Storage::disk('public')->put($qrPath, $qrImage);
         $vehicle->update(['qr_code' => $qrPath]);
 
-        return redirect()->route('vehicles.index')->with('success', 'Data kendaraan berhasil ditambahkan.');
+        return redirect()
+            ->route('vehicles.index')
+            ->with('success', 'Kendaraan berhasil ditambahkan.');
     }
 
     public function show(Vehicle $vehicle)
@@ -101,7 +103,6 @@ class VehicleController extends Controller
             ? VehicleModel::where('vehicle_brand_id', $selectedBrand->id)->get()
             : collect();
 
-        // Hanya user mahasiswa
         $users = User::where('role', 'mahasiswa')->get();
 
         return view('admin.vehicles.edit', compact('vehicle', 'types', 'brands', 'models', 'users'));
@@ -118,7 +119,9 @@ class VehicleController extends Controller
 
         $user = User::findOrFail($request->user_id);
         if ($user->role !== 'mahasiswa') {
-            return back()->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])->withInput();
+            return back()
+                ->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])
+                ->withInput();
         }
 
         $stnkPath = $vehicle->stnk_image;
@@ -137,7 +140,9 @@ class VehicleController extends Controller
             'stnk_image' => $stnkPath,
         ]);
 
-        return redirect()->route('vehicles.index')->with('success', 'Kendaraan berhasil diperbarui.');
+        return redirect()
+            ->route('vehicles.index')
+            ->with('success', 'Kendaraan berhasil diperbarui.');
     }
 
     public function destroy(Vehicle $vehicle)
@@ -152,6 +157,8 @@ class VehicleController extends Controller
 
         $vehicle->delete();
 
-        return redirect()->route('vehicles.index')->with('success', 'Kendaraan berhasil dihapus.');
+        return redirect()
+            ->route('vehicles.index')
+            ->with('success', 'Kendaraan berhasil dihapus.');
     }
 }

@@ -2,6 +2,8 @@
 
 @section('content')
 <div class="container py-5">
+
+    {{-- Judul Halaman --}}
     <div class="mb-2">
         <h3 class="fw-bold">Tambah Petugas</h3>
         <p class="text-muted small mb-0">
@@ -11,6 +13,7 @@
         </p>
     </div>
 
+    {{-- Form Tambah --}}
     <div class="card border-0 shadow rounded-4 mt-3">
         <div class="card-body p-4">
             <form action="{{ route('officers.store') }}" method="POST" enctype="multipart/form-data">
@@ -121,11 +124,35 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section('scripts')
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function togglePassword(id) {
     const input = document.getElementById(id);
     input.type = input.type === "password" ? "text" : "password";
 }
+
+// Handle flash messages menggunakan SweetAlert2
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: '{{ session('success') }}',
+        timer: 2500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+    });
+@elseif(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: '{{ session('error') }}',
+        timer: 2500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+    });
+@endif
 </script>
 @endsection

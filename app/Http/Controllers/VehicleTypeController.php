@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class VehicleTypeController extends Controller
 {
@@ -26,18 +28,23 @@ class VehicleTypeController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'area_size' => 'nullable|numeric|min:0', // ditambahkan validasi untuk area_size
+            'area_size' => 'nullable|numeric|min:0',
         ]);
 
-        VehicleType::create([
-            'name' => $request->name,
-            'area_size' => $request->area_size,
-        ]);
+        try {
+            VehicleType::create($validated);
 
-        return redirect()->route('vehicle-types.index')
-            ->with('success', 'Jenis kendaraan berhasil ditambahkan.');
+            return redirect()->route('vehicle-types.index')
+                ->with('success', 'Jenis kendaraan berhasil ditambahkan.');
+        } catch (QueryException $e) {
+            Log::error('VehicleType store failed: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan jenis kendaraan. Periksa input Anda.');
+        }
     }
 
     public function edit(VehicleType $vehicleType)
@@ -47,25 +54,37 @@ class VehicleTypeController extends Controller
 
     public function update(Request $request, VehicleType $vehicleType)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'area_size' => 'nullable|numeric|min:0', // validasi update
+            'area_size' => 'nullable|numeric|min:0',
         ]);
 
-        $vehicleType->update([
-            'name' => $request->name,
-            'area_size' => $request->area_size,
-        ]);
+        try {
+            $vehicleType->update($validated);
 
-        return redirect()->route('vehicle-types.index')
-            ->with('success', 'Jenis kendaraan berhasil diperbarui.');
+            return redirect()->route('vehicle-types.index')
+                ->with('success', 'Jenis kendaraan berhasil diperbarui.');
+        } catch (QueryException $e) {
+            Log::error('VehicleType update failed: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui jenis kendaraan. Periksa input Anda.');
+        }
     }
 
     public function destroy(VehicleType $vehicleType)
     {
-        $vehicleType->delete();
+        try {
+            $vehicleType->delete();
 
-        return redirect()->route('vehicle-types.index')
-            ->with('success', 'Jenis kendaraan berhasil dihapus.');
+            return redirect()->route('vehicle-types.index')
+                ->with('success', 'Jenis kendaraan berhasil dihapus.');
+        } catch (QueryException $e) {
+            Log::error('VehicleType delete failed: ' . $e->getMessage());
+
+            return back()
+                ->with('error', 'Gagal menghapus jenis kendaraan. Data mungkin sedang digunakan.');
+        }
     }
 }

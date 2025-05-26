@@ -29,24 +29,24 @@ class VehicleModelController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'vehicle_brand_id' => 'required|exists:vehicle_brands,id',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'vehicle_brand_id' => 'required|exists:vehicle_brands,id',
+        ]);
 
-    $brand = VehicleBrand::findOrFail($request->vehicle_brand_id); // ⬅️ fix error $brand undefined
+        $brand = VehicleBrand::findOrFail($request->vehicle_brand_id);
 
-    VehicleModel::create([
-        'name' => $request->name,
-        'vehicle_brand_id' => $brand->id,
-        'vehicle_type_id' => $brand->vehicle_type_id, // ⬅️ now valid
-    ]);
+        VehicleModel::create([
+            'name' => $request->name,
+            'vehicle_brand_id' => $brand->id,
+            'vehicle_type_id' => $brand->vehicle_type_id,
+        ]);
 
-    return redirect()->route('vehicle-models.index')->with('success', 'Model kendaraan berhasil ditambahkan.');
-}
-
-
+        return redirect()
+            ->route('vehicle-models.index')
+            ->with('success', 'Model kendaraan berhasil ditambahkan.');
+    }
 
     public function edit(VehicleModel $vehicleModel)
     {
@@ -61,15 +61,25 @@ class VehicleModelController extends Controller
             'vehicle_brand_id' => 'required|exists:vehicle_brands,id',
         ]);
 
-        $vehicleModel->update($request->only('name', 'vehicle_brand_id'));
+        $brand = VehicleBrand::findOrFail($request->vehicle_brand_id);
 
-        return redirect()->route('vehicle-models.index')->with('success', 'Model kendaraan berhasil diperbarui.');
+        $vehicleModel->update([
+            'name' => $request->name,
+            'vehicle_brand_id' => $brand->id,
+            'vehicle_type_id' => $brand->vehicle_type_id,
+        ]);
+
+        return redirect()
+            ->route('vehicle-models.index')
+            ->with('success', 'Model kendaraan berhasil diperbarui.');
     }
 
     public function destroy(VehicleModel $vehicleModel)
     {
         $vehicleModel->delete();
 
-        return redirect()->route('vehicle-models.index')->with('success', 'Model kendaraan berhasil dihapus.');
+        return redirect()
+            ->route('vehicle-models.index')
+            ->with('success', 'Model kendaraan berhasil dihapus.');
     }
 }

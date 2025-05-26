@@ -2,6 +2,7 @@
 
 @section('content')
     <div class="container py-5">
+
         {{-- Judul --}}
         <h4 class="fw-bold mb-3">Daftar Model Kendaraan</h4>
 
@@ -22,14 +23,6 @@
             </form>
         </div>
 
-        {{-- Alert sukses --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Berhasil!</strong> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-            </div>
-        @endif
-
         {{-- Tabel --}}
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body p-4">
@@ -41,7 +34,6 @@
                                     <th style="width: 5%;">#</th>
                                     <th>Nama Model</th>
                                     <th>Merk Kendaraan</th>
-                                    {{-- Hapus kolom jenis kendaraan --}}
                                     <th style="width: 20%;">Aksi</th>
                                 </tr>
                             </thead>
@@ -51,19 +43,16 @@
                                         <td>{{ $vehicleModels->firstItem() + $index }}</td>
                                         <td class="fw-semibold">{{ $model->name }}</td>
                                         <td>{{ $model->vehicleBrand->name }}</td>
-                                        {{-- Hapus kolom jenis kendaraan --}}
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a href="{{ route('vehicle-models.edit', $model->id) }}"
                                                     class="btn btn-sm btn-warning">
                                                     <i class="bi bi-pencil-square"></i> Edit
                                                 </a>
-                                                <form action="{{ route('vehicle-models.destroy', $model->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus model ini?')">
+                                                <form action="{{ route('vehicle-models.destroy', $model->id) }}" method="POST" class="delete-form">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger" type="submit">
+                                                    <button class="btn btn-sm btn-danger btn-delete" type="button">
                                                         <i class="bi bi-trash"></i> Hapus
                                                     </button>
                                                 </form>
@@ -88,4 +77,53 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Flash message
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: @json(session('success')),
+            timer: 2500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+        });
+    @elseif(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: @json(session('error')),
+            timer: 2500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+        });
+    @endif
+
+    // Konfirmasi hapus
+    $(document).ready(function () {
+        $('.btn-delete').click(function(e) {
+            e.preventDefault();
+
+            const form = $(this).closest('form');
+
+            Swal.fire({
+                title: 'Yakin ingin menghapus model ini?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 @endsection

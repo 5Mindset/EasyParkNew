@@ -15,6 +15,15 @@
         </p>
     </div>
 
+    {{-- Notifikasi Sukses --}}
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+        </div>
+    @endif
+
     {{-- Form Tambah --}}
     <div class="card border-0 shadow rounded-4 mt-3">
         <div class="card-body p-4">

@@ -21,7 +21,7 @@
             <form action="{{ route('vehicle-brands.store') }}" method="POST">
                 @csrf
 
-                {{-- Input Nama --}}
+                {{-- Input Nama Merek --}}
                 <div class="mb-3">
                     <label for="name" class="form-label">Nama Merek</label>
                     <input 

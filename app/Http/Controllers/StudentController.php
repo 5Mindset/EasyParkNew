@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
@@ -45,25 +47,31 @@ class StudentController extends Controller
             'image'         => 'nullable|image|max:2048',
         ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('uploads/mahasiswa', 'public');
+        try {
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('uploads/mahasiswa', 'public');
+            }
+
+            User::create([
+                'nim'           => $request->nim,
+                'name'          => explode(' ', $request->full_name)[0],
+                'full_name'     => $request->full_name,
+                'email'         => $request->email,
+                'phone_number'  => $request->phone_number,
+                'date_of_birth' => $request->date_of_birth,
+                'address'       => $request->address,
+                'password'      => Hash::make($request->password),
+                'role'          => 'mahasiswa',
+                'image'         => $imagePath,
+            ]);
+
+            return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
+        } catch (QueryException $e) {
+            Log::error('Student store failed: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Gagal menambahkan mahasiswa. Periksa input Anda.');
         }
-
-        User::create([
-            'nim'           => $request->nim,
-            'name'          => explode(' ', $request->full_name)[0],
-            'full_name'     => $request->full_name,
-            'email'         => $request->email,
-            'phone_number'  => $request->phone_number,
-            'date_of_birth' => $request->date_of_birth,
-            'address'       => $request->address,
-            'password'      => Hash::make($request->password),
-            'role'          => 'mahasiswa',
-            'image'         => $imagePath,
-        ]);
-
-        return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
     }
 
     public function edit(User $student)
@@ -101,32 +109,37 @@ class StudentController extends Controller
             'image'         => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only([
-            'full_name',
-            'email',
-            'phone_number',
-            'date_of_birth',
-            'address',
-        ]);
+        try {
+            $data = $request->only([
+                'full_name',
+                'email',
+                'phone_number',
+                'date_of_birth',
+                'address',
+            ]);
 
-        $data['nim'] = $request->nim;
-        $data['name'] = explode(' ', $request->full_name)[0];
+            $data['nim'] = $request->nim;
+            $data['name'] = explode(' ', $request->full_name)[0];
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        if ($request->hasFile('image')) {
-            if ($student->image) {
-                Storage::disk('public')->delete($student->image);
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
             }
 
-            $data['image'] = $request->file('image')->store('uploads/mahasiswa', 'public');
+            if ($request->hasFile('image')) {
+                if ($student->image) {
+                    Storage::disk('public')->delete($student->image);
+                }
+                $data['image'] = $request->file('image')->store('uploads/mahasiswa', 'public');
+            }
+
+            $student->update($data);
+
+            return redirect()->route('students.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
+        } catch (QueryException $e) {
+            Log::error('Student update failed: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Gagal memperbarui data mahasiswa. Periksa input Anda.');
         }
-
-        $student->update($data);
-
-        return redirect()->route('students.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
 
     public function destroy(User $student)
@@ -135,12 +148,18 @@ class StudentController extends Controller
             abort(404);
         }
 
-        if ($student->image) {
-            Storage::disk('public')->delete($student->image);
+        try {
+            if ($student->image) {
+                Storage::disk('public')->delete($student->image);
+            }
+
+            $student->delete();
+
+            return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil dihapus.');
+        } catch (QueryException $e) {
+            Log::error('Student delete failed: ' . $e->getMessage());
+
+            return back()->with('error', 'Gagal menghapus mahasiswa. Data mungkin sedang digunakan.');
         }
-
-        $student->delete();
-
-        return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil dihapus.');
     }
 }

@@ -16,22 +16,6 @@
             </form>
         </div>
 
-        {{-- Alert sukses --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Berhasil!</strong> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-            </div>
-        @endif
-
-        {{-- Alert error --}}
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Gagal!</strong> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-            </div>
-        @endif
-
         {{-- Tabel --}}
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body p-4">
