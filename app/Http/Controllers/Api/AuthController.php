@@ -158,7 +158,8 @@ class AuthController extends Controller
 
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('uploads/users', $filename, 'public');
+            $folder = $user->role ?? 'users'; // fallback ke users kalau kosong
+            $path = $file->storeAs("uploads/{$folder}", $filename, 'public');
             $user->image = 'storage/' . $path;
         }
 
@@ -174,30 +175,33 @@ class AuthController extends Controller
      * Upload Profile Image Saja - Jika mau upload gambar doang
      */
     public function uploadProfileImage(Request $request)
-    {
-        $request->validate([
-            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+{
+    $request->validate([
+        'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
 
-        if ($user->image && Storage::disk('public')->exists(str_replace('storage/', '', $user->image))) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $user->image));
-        }
-
-        $file = $request->file('image');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('uploads/users', $filename, 'public');
-
-        $user->image = 'storage/' . $path;
-        $user->save();
-
-        return response()->json([
-            'message' => 'Foto profil berhasil diupload!',
-            'profile_photo_url' => asset($user->image),
-            'user' => $user
-        ]);
+    // Hapus gambar lama jika ada
+    if ($user->image && Storage::disk('public')->exists(str_replace('storage/', '', $user->image))) {
+        Storage::disk('public')->delete(str_replace('storage/', '', $user->image));
     }
+
+    $file = $request->file('image');
+    $filename = time() . '_' . $file->getClientOriginalName();
+    $folder = $user->role ?? 'users'; // fallback
+    $path = $file->storeAs("uploads/{$folder}", $filename, 'public');
+
+    $user->image = 'storage/' . $path;
+    $user->save();
+
+    return response()->json([
+        'message' => 'Foto profil berhasil diupload!',
+        'profile_photo_url' => asset($user->image),
+        'user' => $user
+    ]);
+}
+
 
     /**
      * Get Profile Image URL
