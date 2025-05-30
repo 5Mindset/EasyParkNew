@@ -48,16 +48,24 @@ class VehicleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'plate_number' => 'required|string|max:20|unique:vehicles,plate_number',
+            'plate_number'     => 'required|string|max:20|unique:vehicles,plate_number',
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'user_id' => 'required|exists:users,id',
-            'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'user_id'          => 'required|exists:users,id',
+            'stnk_image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = User::findOrFail($request->user_id);
+
         if ($user->role !== 'mahasiswa') {
             return back()
                 ->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])
+                ->withInput();
+        }
+
+        // Maksimal 3 kendaraan per mahasiswa
+        if (Vehicle::where('user_id', $request->user_id)->count() >= 3) {
+            return back()
+                ->withErrors(['user_id' => 'Pengguna ini sudah memiliki 3 kendaraan.'])
                 ->withInput();
         }
 
@@ -70,6 +78,7 @@ class VehicleController extends Controller
 
         $vehicle = Vehicle::create($data);
 
+        // Generate QR Code
         $qrPath = 'uploads/qrcodes/' . $vehicle->id . '_' . Str::random(6) . '.svg';
         $qrData = route('vehicles.show', $vehicle->id);
         $qrImage = QrCode::format('svg')->size(200)->generate($qrData);
@@ -111,18 +120,11 @@ class VehicleController extends Controller
     public function update(Request $request, Vehicle $vehicle)
     {
         $request->validate([
-            'plate_number' => 'required|string|max:20|unique:vehicles,plate_number,' . $vehicle->id,
+            'plate_number'     => 'required|string|max:20|unique:vehicles,plate_number,' . $vehicle->id,
             'vehicle_model_id' => 'required|exists:vehicle_models,id',
-            'user_id' => 'required|exists:users,id',
-            'stnk_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            // 'user_id' tidak perlu validasi di sini karena tidak diubah
+            'stnk_image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-
-        $user = User::findOrFail($request->user_id);
-        if ($user->role !== 'mahasiswa') {
-            return back()
-                ->withErrors(['user_id' => 'Pengguna yang dipilih harus mahasiswa.'])
-                ->withInput();
-        }
 
         $stnkPath = $vehicle->stnk_image;
 
@@ -134,10 +136,10 @@ class VehicleController extends Controller
         }
 
         $vehicle->update([
-            'plate_number' => strtoupper($request->plate_number),
+            'plate_number'     => strtoupper($request->plate_number),
             'vehicle_model_id' => $request->vehicle_model_id,
-            'user_id' => $request->user_id,
-            'stnk_image' => $stnkPath,
+            // 'user_id' tetap sama seperti sebelumnya
+            'stnk_image'       => $stnkPath,
         ]);
 
         return redirect()

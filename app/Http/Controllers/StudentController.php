@@ -43,9 +43,7 @@ class StudentController extends Controller
                         ->orWhere('email', 'like', '%' . $search . '%')
 
                         ->orWhere('phone_number', 'like', '%' . $search . '%');
-
                 });
-
             })
 
             ->orderBy('created_at', 'desc')
@@ -55,7 +53,6 @@ class StudentController extends Controller
 
 
         return view('admin.students.index', compact('students'));
-
     }
 
 
@@ -65,7 +62,6 @@ class StudentController extends Controller
     {
 
         return view('admin.students.create');
-
     }
 
 
@@ -103,7 +99,6 @@ class StudentController extends Controller
             if ($request->hasFile('image')) {
 
                 $imagePath = $request->file('image')->store('uploads/mahasiswa', 'public');
-
             }
 
 
@@ -135,7 +130,6 @@ class StudentController extends Controller
 
 
             return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
-
         } catch (QueryException $e) {
 
             Log::error('Student store failed: ' . $e->getMessage());
@@ -143,9 +137,7 @@ class StudentController extends Controller
 
 
             return back()->withInput()->with('error', 'Gagal menambahkan mahasiswa. Periksa input Anda.');
-
         }
-
     }
 
 
@@ -157,32 +149,26 @@ class StudentController extends Controller
         if ($student->role !== 'mahasiswa') {
 
             abort(404);
-
         }
 
 
 
         return view('admin.students.edit', compact('student'));
-
     }
 
 
 
     public function show(User $student)
-
     {
-
         if ($student->role !== 'mahasiswa') {
-
             abort(404);
-
         }
 
-
+        $student->load('vehicles'); // eager loading kendaraan
 
         return view('admin.students.show', compact('student'));
-
     }
+
 
 
 
@@ -193,7 +179,6 @@ class StudentController extends Controller
         if ($student->role !== 'mahasiswa') {
 
             abort(404);
-
         }
 
 
@@ -247,7 +232,6 @@ class StudentController extends Controller
             if ($request->filled('password')) {
 
                 $data['password'] = Hash::make($request->password);
-
             }
 
 
@@ -257,11 +241,9 @@ class StudentController extends Controller
                 if ($student->image) {
 
                     Storage::disk('public')->delete($student->image);
-
                 }
 
                 $data['image'] = $request->file('image')->store('uploads/mahasiswa', 'public');
-
             }
 
 
@@ -271,7 +253,6 @@ class StudentController extends Controller
 
 
             return redirect()->route('students.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
-
         } catch (QueryException $e) {
 
             Log::error('Student update failed: ' . $e->getMessage());
@@ -279,9 +260,7 @@ class StudentController extends Controller
 
 
             return back()->withInput()->with('error', 'Gagal memperbarui data mahasiswa. Periksa input Anda.');
-
         }
-
     }
 
 
@@ -293,7 +272,6 @@ class StudentController extends Controller
         if ($student->role !== 'mahasiswa') {
 
             abort(404);
-
         }
 
 
@@ -303,7 +281,6 @@ class StudentController extends Controller
             if ($student->image) {
 
                 Storage::disk('public')->delete($student->image);
-
             }
 
 
@@ -313,7 +290,6 @@ class StudentController extends Controller
 
 
             return redirect()->route('students.index')->with('success', 'Mahasiswa berhasil dihapus.');
-
         } catch (QueryException $e) {
 
             Log::error('Student delete failed: ' . $e->getMessage());
@@ -321,10 +297,6 @@ class StudentController extends Controller
 
 
             return back()->with('error', 'Gagal menghapus mahasiswa. Data mungkin sedang digunakan.');
-
         }
-
     }
-
 }
-
