@@ -17,12 +17,12 @@ class GuestVehicleFactory extends Factory
         $exit = (clone $entry)->modify('+'.rand(1, 3).' hours');
 
         return [
-            'owner_name' => $this->faker->name(),
+            'name' => $this->faker->name(),
             'plate_number' => strtoupper($this->faker->bothify('N #### ??')), // contoh: N 1234 AB
             'vehicle_type_id' => VehicleType::inRandomOrder()->first()?->id ?? VehicleType::factory(),
             'entry_time' => $entry,
             'exit_time' => $this->faker->boolean(70) ? $exit : null, // 70% sudah keluar
-            'status' => $this->faker->randomElement(['masuk', 'keluar']),
+            'status' => $this->faker->randomElement(['parked', 'exited']),
         ];
     }
 }

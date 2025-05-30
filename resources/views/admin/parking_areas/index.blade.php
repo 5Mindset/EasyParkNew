@@ -2,30 +2,20 @@
 
 @section('content')
     <div class="container py-5">
+
         {{-- Judul --}}
         <h4 class="fw-bold mb-3">Daftar Area Parkir</h4>
 
-        {{-- Baris: Search --}}
-        <div class="d-flex justify-content-end align-items-center mb-4 flex-wrap gap-3">
-            {{-- Form Search --}}
-            <form action="{{ route('parking-areas.index') }}" method="GET" class="position-relative"
-                style="max-width: 250px; width: 100%;">
-                <input type="text" name="search" class="form-control ps-5" placeholder="Cari nama area..."
-                    value="{{ request('search') }}">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-            </form>
-        </div>
+        {{-- Spacer kosong (pengganti form search agar layout tetap rapi) --}}
+        <div class="d-flex justify-content-end align-items-center mb-4 flex-wrap gap-3" style="height: 40px;"></div>
 
         {{-- Tabel --}}
         <div class="card border-0 shadow rounded-4 mb-4">
             <div class="card-body p-4">
                 @if ($parkingAreas->count())
                     @php
-                        // Cek apakah ada area terkunci
                         $hasLockedArea = $parkingAreas
-                            ->filter(function ($area) {
-                                return $area->parkingRecords()->where('status', 'parked')->exists();
-                            })
+                            ->filter(fn($area) => $area->parkingRecords()->where('status', 'parked')->exists())
                             ->isNotEmpty();
                     @endphp
 
@@ -47,10 +37,7 @@
                                         <td>{{ $area->max_area }}</td>
                                         <td>
                                             @php
-                                                $isLocked = $area
-                                                    ->parkingRecords()
-                                                    ->where('status', 'parked')
-                                                    ->exists();
+                                                $isLocked = $area->parkingRecords()->where('status', 'parked')->exists();
                                             @endphp
 
                                             @if ($isLocked)
@@ -71,19 +58,16 @@
                         </table>
                     </div>
 
-                    {{-- Catatan hanya muncul jika ada area terkunci --}}
                     @if ($hasLockedArea)
                         <div class="alert alert-info mt-4 mb-0 rounded-4 d-flex align-items-start gap-2" role="alert">
                             <i class="bi bi-exclamation-circle-fill fs-5 mt-1"></i>
                             <div>
                                 <strong>Catatan:</strong> Area parkir yang sedang digunakan tidak dapat diedit. Silakan
-                                tunggu
-                                hingga semua kendaraan keluar untuk dapat mengedit data area tersebut.
+                                tunggu hingga semua kendaraan keluar untuk dapat mengedit data area tersebut.
                             </div>
                         </div>
                     @endif
 
-                    {{-- Pagination Tailwind --}}
                     <div class="mt-3">
                         {{ $parkingAreas->withQueryString()->links('pagination::tailwind') }}
                     </div>

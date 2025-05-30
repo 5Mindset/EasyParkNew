@@ -1,9 +1,9 @@
 <!-- ======= Header ======= -->
 <header id="header" class="header fixed-top d-flex align-items-center">
-
     <div class="d-flex align-items-center justify-content-between">
         <a class="logo mx-auto d-flex align-items-center justify-content-center">
-            <img src="{{ asset('assets/img/logohitam.png') }}" alt="Logo" style="max-height: 40px;">
+<img src="{{ asset('assets/img/Logohitam.png') }}" alt="Logo" style="max-height: 40px;">
+
         </a>
         <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
@@ -39,19 +39,19 @@
                     <li><hr class="dropdown-divider"></li>
 
                     <li>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <button id="logoutButton" class="dropdown-item d-flex align-items-center" type="button">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Keluar</span>
+                        </button>
+
+                        <form id="logoutForm" method="POST" action="{{ route('logout') }}" style="display: none;">
                             @csrf
-                            <button class="dropdown-item d-flex align-items-center" type="submit">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Keluar</span>
-                            </button>
                         </form>
                     </li>
                 </ul><!-- End Profile Dropdown Items -->
             </li><!-- End Profile Nav -->
         </ul>
     </nav><!-- End Icons Navigation -->
-
 </header><!-- End Header -->
 
 <!-- ======= Head Meta & CSS ======= -->
@@ -71,9 +71,7 @@
 
 <!-- Google Fonts -->
 <link href="https://fonts.gstatic.com" rel="preconnect">
-<link
-    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-    rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
 <!-- Vendor CSS Files -->
 <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -93,15 +91,36 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Bootstrap Bundle JS (wajib untuk dropdown) -->
+<!-- Bootstrap Bundle JS (dropdown dll) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Inisialisasi Dropdown (Jika diperlukan tambahan debug) -->
+<!-- Dropdown Inisialisasi -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
         dropdownTriggerList.map(function (dropdownTriggerEl) {
             new bootstrap.Dropdown(dropdownTriggerEl)
-        })
+        });
+
+        // SweetAlert logout
+        const logoutBtn = document.getElementById('logoutButton');
+        const logoutForm = document.getElementById('logoutForm');
+
+        logoutBtn?.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Apakah Anda yakin ingin keluar?',
+                text: "Anda akan logout dari sistem.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, logout!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    logoutForm.submit();
+                }
+            });
+        });
     });
 </script>

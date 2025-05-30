@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class VehicleBrand extends Model
 {
+    use HasFactory; // ? tambahkan ini
+
     protected $fillable = ['name', 'vehicle_type_id'];
 
     public function models()

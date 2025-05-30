@@ -10,13 +10,10 @@ class VehicleBrandFactory extends Factory
 {
     protected $model = VehicleBrand::class;
 
-    public function definition()
+    public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement([
-                'Honda', 'Yamaha', 'Suzuki', 'Kawasaki', // motor
-                'Toyota', 'Daihatsu', 'Mitsubishi', 'Nissan', 'Hyundai' // mobil
-            ]),
+            'name' => $this->faker->unique()->company(), // Menghasilkan nama brand acak seperti "Zemlak Group"
             'vehicle_type_id' => VehicleType::inRandomOrder()->first()?->id ?? VehicleType::factory(),
         ];
     }

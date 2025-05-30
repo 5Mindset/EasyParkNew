@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             VehicleModelSeeder::class,
             ParkingAreaSeeder::class,
             VehicleSeeder::class,
-            ParkingRecordSeeder::class,
+           //  ParkingRecordSeeder::class,
             GuestVehicleSeeder::class,
         ]);
     }

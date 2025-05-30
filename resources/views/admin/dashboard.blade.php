@@ -19,8 +19,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">Mahasiswa</h5>
                                 <div class="d-flex align-items-center">
-                                    <div
-                                        class="card-icon rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                    <div class="card-icon rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
                                         <i class="bi bi-person-lines-fill"></i>
                                     </div>
                                     <div class="ps-3">
@@ -38,8 +37,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">Kendaraan</h5>
                                 <div class="d-flex align-items-center">
-                                    <div
-                                        class="card-icon rounded-circle bg-success text-white d-flex align-items-center justify-content-center">
+                                    <div class="card-icon rounded-circle bg-success text-white d-flex align-items-center justify-content-center">
                                         <i class="bi bi-truck"></i>
                                     </div>
                                     <div class="ps-3">
@@ -57,8 +55,7 @@
                             <div class="card-body">
                                 <h5 class="card-title"><i class="bi bi-parking me-2"></i>Parkir Mahasiswa</h5>
                                 <div class="d-flex align-items-center">
-                                    <div
-                                        class="card-icon rounded-circle bg-warning text-white d-flex align-items-center justify-content-center">
+                                    <div class="card-icon rounded-circle bg-warning text-white d-flex align-items-center justify-content-center">
                                         <i class="bi bi-car-front-fill"></i>
                                     </div>
                                     <div class="ps-3">
@@ -76,8 +73,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">Parkir Tamu</h5>
                                 <div class="d-flex align-items-center">
-                                    <div
-                                        class="card-icon rounded-circle bg-danger text-white d-flex align-items-center justify-content-center">
+                                    <div class="card-icon rounded-circle bg-danger text-white d-flex align-items-center justify-content-center">
                                         <i class="bi bi-car-front-fill"></i>
                                     </div>
                                     <div class="ps-3">
@@ -91,6 +87,7 @@
 
                 </div>
             </div><!-- End Dashboard Cards -->
+
             <!-- Monitoring Parkir Hari Ini -->
             <div class="col-12 mt-4">
                 <div class="card shadow-sm border-0">
@@ -113,7 +110,7 @@
                                     @forelse ($parkirHariIni as $data)
                                         @php
                                             $isMotor = strtolower($data['tipe_kendaraan']) === 'motor';
-                                            $icon = $isMotor ? 'bi-bicycle' : 'bi-car-front-fill'; // pakai bicycle untuk motor
+                                            $icon = $isMotor ? 'bi-bicycle' : 'bi-car-front-fill';
                                             $badgeColor = $data['tipe'] === 'Mahasiswa' ? 'primary' : 'danger';
                                         @endphp
                                         <tr>
@@ -124,14 +121,12 @@
                                             </td>
                                             <td class="fw-semibold">{{ $data['name'] }}</td>
                                             <td>
-                                                <span
-                                                    class="badge bg-dark-subtle text-dark-emphasis px-3 py-2 rounded-pill">
+                                                <span class="badge bg-dark-subtle text-dark-emphasis px-3 py-2 rounded-pill">
                                                     {{ $data['plat'] }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <i
-                                                    class="fa-solid {{ $icon }} me-1"></i>{{ ucfirst($data['tipe_kendaraan']) }}
+                                                <i class="fa-solid {{ $icon }} me-1"></i>{{ ucfirst($data['tipe_kendaraan']) }}
                                             </td>
                                             <td class="text-success fw-medium">
                                                 <i class="bi bi-arrow-right-circle-fill me-1"></i>
