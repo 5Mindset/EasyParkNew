@@ -56,14 +56,18 @@ class ParkingAreaController extends Controller
             ->where('status', 'parked')
             ->exists();
 
-        if ($hasParkedVehicles) {
+        $hasParkedGuestVehicles = $parkingArea->guestVehicles()
+            ->where('status', 'parked')
+            ->exists();
+
+        if ($hasParkedVehicles || $hasParkedGuestVehicles) {
             return redirect()->route('parking-areas.index')
-                ->with('error', 'Area parkir tidak bisa diedit karena ada kendaraan yang sedang parkir.');
+                ->with('error', 'Area parkir tidak bisa diedit karena ada kendaraan (mahasiswa/tamu) yang sedang parkir.');
         }
 
         return view('admin.parking_areas.edit', [
             'parkingArea' => $parkingArea,
-            'is_locked' => $hasParkedVehicles, // false karena sudah dicek
+            'is_locked' => false,
         ]);
     }
 

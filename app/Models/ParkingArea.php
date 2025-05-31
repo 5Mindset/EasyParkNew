@@ -15,4 +15,9 @@ class ParkingArea extends Model
     {
         return $this->hasMany(ParkingRecord::class);
     }
+
+    public function parkingArea()
+    {
+        return $this->belongsTo(ParkingArea::class);
+    }
 }

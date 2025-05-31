@@ -23,4 +23,9 @@ class GuestVehicle extends Model
     {
         return $this->belongsTo(VehicleType::class);
     }
+
+    public function guestVehicles()
+    {
+        return $this->hasMany(GuestVehicle::class);
+    }
 }

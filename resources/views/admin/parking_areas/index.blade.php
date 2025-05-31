@@ -14,8 +14,12 @@
             <div class="card-body p-4">
                 @if ($parkingAreas->count())
                     @php
+                        // Cek jika ada area yang terkunci (karena ada kendaraan mahasiswa/tamu sedang parkir)
                         $hasLockedArea = $parkingAreas
-                            ->filter(fn($area) => $area->parkingRecords()->where('status', 'parked')->exists())
+                            ->filter(function ($area) {
+                                return $area->parkingRecords()->where('status', 'parked')->exists() ||
+                                    $area->guestVehicles()->where('status', 'parked')->exists();
+                            })
                             ->isNotEmpty();
                     @endphp
 
@@ -37,7 +41,9 @@
                                         <td>{{ $area->max_area }}</td>
                                         <td>
                                             @php
-                                                $isLocked = $area->parkingRecords()->where('status', 'parked')->exists();
+                                                $isLocked =
+                                                    $area->parkingRecords()->where('status', 'parked')->exists() ||
+                                                    $area->guestVehicles()->where('status', 'parked')->exists();
                                             @endphp
 
                                             @if ($isLocked)
@@ -62,8 +68,9 @@
                         <div class="alert alert-info mt-4 mb-0 rounded-4 d-flex align-items-start gap-2" role="alert">
                             <i class="bi bi-exclamation-circle-fill fs-5 mt-1"></i>
                             <div>
-                                <strong>Catatan:</strong> Area parkir yang sedang digunakan tidak dapat diedit. Silakan
-                                tunggu hingga semua kendaraan keluar untuk dapat mengedit data area tersebut.
+                                <strong>Catatan:</strong> Area parkir yang sedang digunakan oleh kendaraan (mahasiswa/tamu)
+                                tidak dapat diedit. Silakan tunggu hingga semua kendaraan keluar untuk dapat mengedit data
+                                area tersebut.
                             </div>
                         </div>
                     @endif
