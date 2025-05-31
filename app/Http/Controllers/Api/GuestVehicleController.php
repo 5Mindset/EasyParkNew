@@ -6,6 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\GuestVehicle;
 use Illuminate\Http\Request;
 
+use App\Models\ParkingRecord;
+use App\Models\Vehicle;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use App\Models\VehicleType;
+use App\Models\ParkingArea;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
+
 class GuestVehicleController extends Controller
 {
     // List semua kendaraan tamu yang sedang parkir
@@ -16,29 +27,54 @@ class GuestVehicleController extends Controller
             ->get();
     }
 
-    // Simpan data kendaraan tamu baru
     public function store(Request $request)
-    {
-        $request->validate([
-            'plate_number' => 'required|string|max:20|unique:guest_vehicles,plate_number',
-            'name' => 'required|string|max:100',
-            'vehicle_type_id' => 'required|exists:vehicle_types,id',
-            'entry_time' => 'nullable|date',
-            'exit_time' => 'nullable|date|after_or_equal:entry_time',
-            'status' => 'required|in:parked,exited',
-        ]);
+{
+    $request->validate([
+        'plate_number' => 'required|string|max:20|unique:guest_vehicles,plate_number',
+        'name' => 'required|string|max:100',
+        'vehicle_type_id' => 'required|exists:vehicle_types,id',
+        'entry_time' => 'nullable|date',
+        'exit_time' => 'nullable|date|after_or_equal:entry_time',
+        'status' => 'required|in:parked,exited',
+    ]);
 
-        $guestVehicle = GuestVehicle::create([
-            'plate_number' => $request->plate_number,
-            'name' => $request->name,
-            'vehicle_type_id' => $request->vehicle_type_id,
-            'entry_time' => $request->entry_time ?? now(),
-            'exit_time' => $request->exit_time,
-            'status' => $request->status,
-        ]);
+    try {
+        return DB::transaction(function () use ($request) {
+            $vehicleType = VehicleType::findOrFail($request->vehicle_type_id);
+            $requiredArea = (float) $vehicleType->area_size;
 
-        return response()->json($guestVehicle->load('vehicleType'), 201);
+            // Ambil dan kunci area parkir default (misalnya ID 1)
+            $parkingArea = ParkingArea::where('id', 1)->lockForUpdate()->firstOrFail();
+            $availableArea = (float) $parkingArea->max_area;
+
+            if ($availableArea < $requiredArea) {
+                return response()->json([
+                    'message' => 'Kapasitas parkir tidak mencukupi. Area tersedia: ' . $availableArea . ', dibutuhkan: ' . $requiredArea
+                ], 409);
+            }
+
+            // Kurangi kapasitas parkir
+            $parkingArea->max_area = $availableArea - $requiredArea;
+            $parkingArea->save();
+
+            // Simpan data tamu
+            $guestVehicle = GuestVehicle::create([
+                'plate_number' => $request->plate_number,
+                'name' => $request->name,
+                'vehicle_type_id' => $request->vehicle_type_id,
+                'entry_time' => $request->entry_time ?? now(),
+                'exit_time' => $request->exit_time,
+                'status' => $request->status,
+            ]);
+
+            return response()->json($guestVehicle->load('vehicleType'), 201);
+        });
+    } catch (\Exception $e) {
+        Log::error('Gagal menambahkan kendaraan tamu', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Terjadi kesalahan saat menyimpan data kendaraan tamu.'], 500);
     }
+}
+
 
     // Detail kendaraan tamu berdasarkan ID
     public function show($id)
