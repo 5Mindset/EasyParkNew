@@ -6,23 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\GuestVehicle;
 use Illuminate\Http\Request;
 
-use App\Models\ParkingRecord;
-use App\Models\Vehicle;
-
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use App\Models\VehicleType;
 use App\Models\ParkingArea;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Response;
 
 class GuestVehicleController extends Controller
 {
     // List semua kendaraan tamu yang sedang parkir
     public function index()
     {
-        return GuestVehicle::with('vehicleType')
+        return GuestVehicle::with('vehicleType', 'parkingArea')
             ->where('status', 'parked')
             ->get();
     }
@@ -36,6 +30,7 @@ class GuestVehicleController extends Controller
             'entry_time' => 'nullable|date',
             'exit_time' => 'nullable|date|after_or_equal:entry_time',
             'status' => 'required|in:parked,exited',
+            'parking_area_id' => 'nullable|exists:parking_areas,id',
         ]);
 
         try {
@@ -43,8 +38,9 @@ class GuestVehicleController extends Controller
                 $vehicleType = VehicleType::findOrFail($request->vehicle_type_id);
                 $requiredArea = (float) $vehicleType->area_size;
 
-                // Ambil dan kunci area parkir default (misalnya ID 1)
-                $parkingArea = ParkingArea::where('id', 1)->lockForUpdate()->firstOrFail();
+                // Pakai default parking_area_id 1 jika tidak dikirim
+                $parkingAreaId = $request->parking_area_id ?? 1;
+                $parkingArea = ParkingArea::where('id', $parkingAreaId)->lockForUpdate()->firstOrFail();
                 $availableArea = (float) $parkingArea->max_area;
 
                 if ($availableArea < $requiredArea) {
@@ -65,9 +61,10 @@ class GuestVehicleController extends Controller
                     'entry_time' => $request->entry_time ?? now(),
                     'exit_time' => $request->exit_time,
                     'status' => $request->status,
+                    'parking_area_id' => $parkingAreaId,
                 ]);
 
-                return response()->json($guestVehicle->load('vehicleType'), 201);
+                return response()->json($guestVehicle->load('vehicleType', 'parkingArea'), 201);
             });
         } catch (\Exception $e) {
             Log::error('Gagal menambahkan kendaraan tamu', ['error' => $e->getMessage()]);
@@ -78,7 +75,7 @@ class GuestVehicleController extends Controller
     // Detail kendaraan tamu berdasarkan ID
     public function show($id)
     {
-        $guestVehicle = GuestVehicle::with('vehicleType')->findOrFail($id);
+        $guestVehicle = GuestVehicle::with('vehicleType', 'parkingArea')->findOrFail($id);
         return response()->json($guestVehicle);
     }
 
@@ -94,18 +91,53 @@ class GuestVehicleController extends Controller
             'entry_time' => 'nullable|date',
             'exit_time' => 'nullable|date|after_or_equal:entry_time',
             'status' => 'required|in:parked,exited',
+            'parking_area_id' => 'nullable|exists:parking_areas,id',
         ]);
 
-        $guestVehicle->update([
-            'plate_number' => $request->plate_number,
-            'name' => $request->name,
-            'vehicle_type_id' => $request->vehicle_type_id,
-            'entry_time' => $request->entry_time,
-            'exit_time' => $request->exit_time,
-            'status' => $request->status,
-        ]);
+        $oldVehicleType = $guestVehicle->vehicleType;
+        $oldParkingAreaId = $guestVehicle->parking_area_id;
+        $newParkingAreaId = $request->parking_area_id ?? $oldParkingAreaId;
 
-        return response()->json($guestVehicle->load('vehicleType'));
+        try {
+            return DB::transaction(function () use ($guestVehicle, $request, $oldVehicleType, $oldParkingAreaId, $newParkingAreaId) {
+                $newVehicleType = VehicleType::findOrFail($request->vehicle_type_id);
+
+                // Jika pindah area parkir atau tipe kendaraan berubah, harus update kapasitas area
+                if ($oldParkingAreaId != $newParkingAreaId || $oldVehicleType->id != $newVehicleType->id) {
+                    // Kembalikan area di area lama jika status masih 'parked'
+                    if ($guestVehicle->status === 'parked') {
+                        $oldArea = ParkingArea::where('id', $oldParkingAreaId)->lockForUpdate()->firstOrFail();
+                        $oldArea->max_area += (float) $oldVehicleType->area_size;
+                        $oldArea->save();
+
+                        $newArea = ParkingArea::where('id', $newParkingAreaId)->lockForUpdate()->firstOrFail();
+                        $requiredArea = (float) $newVehicleType->area_size;
+
+                        if ($newArea->max_area < $requiredArea) {
+                            throw new \Exception('Kapasitas parkir di area baru tidak mencukupi.');
+                        }
+
+                        $newArea->max_area -= $requiredArea;
+                        $newArea->save();
+                    }
+                }
+
+                $guestVehicle->update([
+                    'plate_number' => $request->plate_number,
+                    'name' => $request->name,
+                    'vehicle_type_id' => $request->vehicle_type_id,
+                    'entry_time' => $request->entry_time,
+                    'exit_time' => $request->exit_time,
+                    'status' => $request->status,
+                    'parking_area_id' => $newParkingAreaId,
+                ]);
+
+                return response()->json($guestVehicle->load('vehicleType', 'parkingArea'));
+            });
+        } catch (\Exception $e) {
+            Log::error('Gagal update kendaraan tamu', ['error' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage() ?: 'Terjadi kesalahan saat mengupdate data kendaraan tamu.'], 500);
+        }
     }
 
     // Hapus kendaraan tamu
@@ -115,16 +147,13 @@ class GuestVehicleController extends Controller
             return DB::transaction(function () use ($id) {
                 $guestVehicle = GuestVehicle::with('vehicleType')->findOrFail($id);
 
-                // Jika kendaraan masih berstatus 'parked', kembalikan area parkir
                 if ($guestVehicle->status === 'parked') {
                     $vehicleType = $guestVehicle->vehicleType;
                     $requiredArea = (float) $vehicleType->area_size;
 
-                    // Ambil dan kunci area parkir default (misalnya ID 1)
-                    $parkingArea = ParkingArea::where('id', 1)->lockForUpdate()->firstOrFail();
+                    $parkingArea = ParkingArea::where('id', $guestVehicle->parking_area_id)->lockForUpdate()->firstOrFail();
 
-                    // Kembalikan area parkir
-                    $parkingArea->max_area = $parkingArea->max_area + $requiredArea;
+                    $parkingArea->max_area += $requiredArea;
                     $parkingArea->save();
                 }
 
@@ -138,8 +167,7 @@ class GuestVehicleController extends Controller
         }
     }
 
-    // Tandai kendaraan keluar (update status dan exit_time)
-    // Trigger di DB akan otomatis buat log di guest_vehicle_logs
+    // Tandai kendaraan keluar
     public function exitVehicle($id)
     {
         try {
@@ -152,18 +180,14 @@ class GuestVehicleController extends Controller
                     ], 400);
                 }
 
-                // Ambil data vehicle type untuk mengetahui area yang perlu dikembalikan
                 $vehicleType = $guestVehicle->vehicleType;
                 $requiredArea = (float) $vehicleType->area_size;
 
-                // Ambil dan kunci area parkir default (misalnya ID 1)
-                $parkingArea = ParkingArea::where('id', 1)->lockForUpdate()->firstOrFail();
+                $parkingArea = ParkingArea::where('id', $guestVehicle->parking_area_id)->lockForUpdate()->firstOrFail();
 
-                // Kembalikan area parkir
-                $parkingArea->max_area = $parkingArea->max_area + $requiredArea;
+                $parkingArea->max_area += $requiredArea;
                 $parkingArea->save();
 
-                // Update status kendaraan
                 $guestVehicle->update([
                     'status' => 'exited',
                     'exit_time' => now(),
@@ -171,7 +195,7 @@ class GuestVehicleController extends Controller
 
                 return response()->json([
                     'message' => 'Kendaraan berhasil keluar, area parkir dikembalikan, dan log otomatis tercatat.',
-                    'data' => $guestVehicle->fresh()->load('vehicleType'),
+                    'data' => $guestVehicle->fresh()->load('vehicleType', 'parkingArea'),
                     'returned_area' => $requiredArea,
                     'current_available_area' => $parkingArea->fresh()->max_area,
                 ]);

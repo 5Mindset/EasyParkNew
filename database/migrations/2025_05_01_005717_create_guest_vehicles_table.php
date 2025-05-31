@@ -15,8 +15,11 @@ return new class extends Migration {
             $table->string('name', 100);
             $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
 
-            // Tambahkan kolom parking_area_id
-            $table->foreignId('parking_area_id')->constrained()->onDelete('cascade');
+            // Definisikan kolom parking_area_id dengan default 1
+            $table->unsignedBigInteger('parking_area_id')->default(1);
+
+            // Buat foreign key secara eksplisit
+            $table->foreign('parking_area_id')->references('id')->on('parking_areas')->onDelete('cascade');
 
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
