@@ -1,5 +1,4 @@
 <?php
-// app/Models/GuestVehicle.php
 
 namespace App\Models;
 
@@ -14,6 +13,7 @@ class GuestVehicle extends Model
         'name',
         'plate_number',
         'vehicle_type_id',
+        'parking_area_id', // ditambahkan
         'entry_time',
         'exit_time',
         'status',
@@ -24,8 +24,8 @@ class GuestVehicle extends Model
         return $this->belongsTo(VehicleType::class);
     }
 
-    public function guestVehicles()
+    public function parkingArea()
     {
-        return $this->hasMany(GuestVehicle::class);
+        return $this->belongsTo(ParkingArea::class);
     }
 }

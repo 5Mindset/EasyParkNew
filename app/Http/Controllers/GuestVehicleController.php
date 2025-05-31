@@ -73,7 +73,6 @@ class GuestVehicleController extends Controller
 
 
         return view('admin.guest_vehicles.index', compact('guestVehicles', 'statuses', 'vehicleTypes'));
-
     }
 
 
@@ -127,7 +126,6 @@ class GuestVehicleController extends Controller
         $pdf = Pdf::loadView('admin.guest_vehicles.pdf', compact('guestVehicles'));
 
         return $pdf->stream('riwayat-guest-vehicles.pdf');
-
     }
 
 
@@ -139,7 +137,6 @@ class GuestVehicleController extends Controller
         $guestVehicle->load('vehicleType');
 
         return view('admin.guest_vehicles.show', compact('guestVehicle'));
-
     }
 
 
@@ -149,7 +146,6 @@ class GuestVehicleController extends Controller
     {
 
         abort(403);
-
     }
 
     public function store(Request $request)
@@ -157,7 +153,6 @@ class GuestVehicleController extends Controller
     {
 
         abort(403);
-
     }
 
     public function edit(GuestVehicle $guestVehicle)
@@ -165,7 +160,6 @@ class GuestVehicleController extends Controller
     {
 
         abort(403);
-
     }
 
     public function update(Request $request, GuestVehicle $guestVehicle)
@@ -173,7 +167,6 @@ class GuestVehicleController extends Controller
     {
 
         abort(403);
-
     }
 
     public function destroy(GuestVehicle $guestVehicle)
@@ -181,8 +174,5 @@ class GuestVehicleController extends Controller
     {
 
         abort(403);
-
     }
-
 }
-

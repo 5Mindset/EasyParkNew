@@ -14,6 +14,10 @@ return new class extends Migration {
             $table->string('plate_number', 20)->unique();
             $table->string('name', 100);
             $table->foreignId('vehicle_type_id')->constrained()->onDelete('cascade');
+
+            // Tambahkan kolom parking_area_id
+            $table->foreignId('parking_area_id')->constrained()->onDelete('cascade');
+
             $table->timestamp('entry_time')->nullable();
             $table->timestamp('exit_time')->nullable();
             $table->enum('status', ['parked', 'exited']);
