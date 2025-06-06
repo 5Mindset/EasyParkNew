@@ -1,0 +1,13 @@
+name: Keep Active
+
+on:
+  schedule:
+    - cron: '0 3 * * *' 
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo to stay active
+        run: echo "🟢 Workflow is alive!"
