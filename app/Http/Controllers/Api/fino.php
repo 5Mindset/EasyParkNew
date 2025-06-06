@@ -4,31 +4,40 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class GenerateRandomCodes extends Command
 {
     protected $signature = 'generate:random-codes';
 
-    protected $description = 'Generate 1732 random codes as a simulation or placeholder.';
+    protected $description = 'Generate 1732 random codes and store them into a file with timestamp.';
 
     public function handle()
     {
         $total = 1732;
         $codes = [];
 
+        $this->info("🔄 Mulai generate $total kode random...");
+        $bar = $this->output->createProgressBar($total);
+        $bar->start();
+
         for ($i = 0; $i < $total; $i++) {
-            $codes[] = strtoupper(Str::random(10));
+            $code = strtoupper(Str::random(10));
+            $codes[] = $code;
+            $bar->advance();
         }
 
-        // Simulasi output ke terminal
-        foreach ($codes as $index => $code) {
-            $this->line("[$index] $code");
-        }
+        $bar->finish();
+        $this->newLine(2);
 
-        // Bisa disimpan ke file juga kalau mau
-        // file_put_contents(storage_path('app/random_codes.txt'), implode(PHP_EOL, $codes));
+        // Buat nama file dengan timestamp
+        $timestamp = now()->format('Ymd_His');
+        $filename = "random_codes_$timestamp.txt";
+        $path = storage_path("app/$filename");
 
-        $this->info("✅ Total $total kode random berhasil digenerate.");
+        file_put_contents($path, implode(PHP_EOL, $codes));
+
+        $this->info("✅ Selesai! Total $total kode disimpan ke: $filename");
         return 0;
     }
 }
